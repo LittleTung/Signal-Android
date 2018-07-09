@@ -97,11 +97,11 @@ public abstract class MessageRecord extends DisplayRecord {
     } else if (isGroupQuit()) {
       return emphasisAdded(context.getString(R.string.ConversationItem_group_action_left, getIndividualRecipient().toShortString()));
     } else if (isIncomingCall()) {
-      return emphasisAdded(context.getString(R.string.MessageRecord_s_called_you, getIndividualRecipient().toShortString()));
+      return new SpannableString(context.getString(R.string.MessageRecord_called_you));
     } else if (isOutgoingCall()) {
-      return emphasisAdded(context.getString(R.string.MessageRecord_called_s, getIndividualRecipient().toShortString()));
+      return new SpannableString(context.getString(R.string.MessageRecord_you_called));
     } else if (isMissedCall()) {
-      return emphasisAdded(context.getString(R.string.MessageRecord_missed_call_from, getIndividualRecipient().toShortString()));
+      return new SpannableString(context.getString(R.string.MessageRecord_missed_call));
     } else if (isJoined()) {
       return emphasisAdded(context.getString(R.string.MessageRecord_s_joined_signal, getIndividualRecipient().toShortString()));
     } else if (isExpirationTimerUpdate()) {
@@ -175,7 +175,7 @@ public abstract class MessageRecord extends DisplayRecord {
   }
 
   public boolean isUpdate() {
-    return isGroupAction() || isCallLog() || isJoined() || isExpirationTimerUpdate() ||
+    return isGroupAction() || isJoined() || isExpirationTimerUpdate() ||
            isEndSession()  || isIdentityUpdate() || isIdentityVerified() || isIdentityDefault();
   }
 

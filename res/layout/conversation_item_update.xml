@@ -27,8 +27,7 @@
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:linksClickable="true"
-                  android:textAppearance="?android:attr/textAppearanceSmall"
-                  android:textStyle="italic"
+                  android:textAppearance="@style/Signal.Text.Preview"
                   android:textColor="?attr/conversation_group_member_name"
                   tools:text="Sasha called you"/>
 

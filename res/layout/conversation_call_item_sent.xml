@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.thoughtcrime.securesms.ConversationCallItem 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/call_bubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="8dp"
+        android:orientation="vertical"
+        android:background="@drawable/message_bubble_background_sent_alone"
+        tools:backgroundTint="@color/core_light_10">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/call_icon_container"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/circle_white">
+
+                <ImageView
+                    android:id="@+id/call_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_call_white_24dp"
+                    tools:tint="@color/core_green"/>
+
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/call_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                style="@style/Signal.Text.Body"
+                android:textColor="?conversation_item_sent_text_primary_color"
+                tools:text="You called"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/call_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            style="@style/Signal.Text.Caption.MessageSent"
+            android:textAllCaps="true"
+            tools:text="9:31 AM"/>
+
+    </LinearLayout>
+
+</org.thoughtcrime.securesms.ConversationCallItem>

@@ -131,6 +131,13 @@ public class DateUtils extends android.text.format.DateUtils {
     }
   }
 
+  public static boolean isSameDay(long t1, long t2) {
+    long d1 = t1 / TimeUnit.DAYS.toMillis(1);
+    long d2 = t2 / TimeUnit.DAYS.toMillis(1);
+
+    return d1 == d2;
+  }
+
   private static String getLocalizedPattern(String template, Locale locale) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       return DateFormat.getBestDateTimePattern(locale, template);

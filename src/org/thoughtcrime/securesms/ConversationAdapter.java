@@ -83,12 +83,14 @@ public class ConversationAdapter <V extends View & BindableConversationItem>
   private static final int MESSAGE_TYPE_OUTGOING           = 0;
   private static final int MESSAGE_TYPE_INCOMING           = 1;
   private static final int MESSAGE_TYPE_UPDATE             = 2;
-  private static final int MESSAGE_TYPE_AUDIO_OUTGOING     = 3;
-  private static final int MESSAGE_TYPE_AUDIO_INCOMING     = 4;
-  private static final int MESSAGE_TYPE_THUMBNAIL_OUTGOING = 5;
-  private static final int MESSAGE_TYPE_THUMBNAIL_INCOMING = 6;
-  private static final int MESSAGE_TYPE_DOCUMENT_OUTGOING  = 7;
-  private static final int MESSAGE_TYPE_DOCUMENT_INCOMING  = 8;
+  private static final int MESSAGE_TYPE_CALL_OUTGOING      = 3;
+  private static final int MESSAGE_TYPE_CALL_INCOMING      = 4;
+  private static final int MESSAGE_TYPE_AUDIO_OUTGOING     = 5;
+  private static final int MESSAGE_TYPE_AUDIO_INCOMING     = 6;
+  private static final int MESSAGE_TYPE_THUMBNAIL_OUTGOING = 7;
+  private static final int MESSAGE_TYPE_THUMBNAIL_INCOMING = 8;
+  private static final int MESSAGE_TYPE_DOCUMENT_OUTGOING  = 9;
+  private static final int MESSAGE_TYPE_DOCUMENT_INCOMING  = 10;
 
   private final Set<MessageRecord> batchSelected = Collections.synchronizedSet(new HashSet<MessageRecord>());
 
@@ -246,6 +248,8 @@ public class ConversationAdapter <V extends View & BindableConversationItem>
       case MESSAGE_TYPE_THUMBNAIL_INCOMING:
       case MESSAGE_TYPE_DOCUMENT_INCOMING:
       case MESSAGE_TYPE_INCOMING:        return R.layout.conversation_item_received;
+      case MESSAGE_TYPE_CALL_OUTGOING:   return R.layout.conversation_call_item_sent;
+      case MESSAGE_TYPE_CALL_INCOMING:   return R.layout.conversation_call_item_received;
       case MESSAGE_TYPE_UPDATE:          return R.layout.conversation_item_update;
       default: throw new IllegalArgumentException("unsupported item view type given to ConversationAdapter");
     }
@@ -255,6 +259,9 @@ public class ConversationAdapter <V extends View & BindableConversationItem>
   public int getItemViewType(@NonNull MessageRecord messageRecord) {
     if (messageRecord.isUpdate()) {
       return MESSAGE_TYPE_UPDATE;
+    } else if (messageRecord.isCallLog()) {
+      if (messageRecord.isOutgoingCall()) return MESSAGE_TYPE_CALL_OUTGOING;
+      else                                return MESSAGE_TYPE_CALL_INCOMING;
     } else if (hasAudio(messageRecord)) {
       if (messageRecord.isOutgoing()) return MESSAGE_TYPE_AUDIO_OUTGOING;
       else                            return MESSAGE_TYPE_AUDIO_INCOMING;

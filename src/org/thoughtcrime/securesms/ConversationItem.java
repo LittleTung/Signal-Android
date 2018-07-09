@@ -521,9 +521,9 @@ public class ConversationItem extends LinearLayout
         setBottomMargin(footer, 0);
         dateText.setTextAppearance(context, R.style.Signal_Text_Caption_MessageImageOverlay);
         deliveryStatusIndicator.setTint(getContext().getResources().getColor(R.color.core_white));
-        mediaThumbnailStub.get().setBackgroundResource(getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
+        mediaThumbnailStub.get().setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
 
-        if (!isGroupThread || !isStartOfMessageCluster(currentMessage, previousMessage, isGroupThread)) {
+        if (!isGroupThread || !BindableConversationItem.isStartOfMessageCluster(currentMessage, previousMessage, isGroupThread)) {
           bodyBubble.setBackgroundColor(Color.TRANSPARENT);
         }
       }
@@ -548,18 +548,18 @@ public class ConversationItem extends LinearLayout
     int bottomLeft  = defaultRadius;
     int bottomRight = defaultRadius;
 
-    if (isStartOfMessageCluster(current, previous, isGroupThread) && isEndOfMessageCluster(current, next, isGroupThread)) {
+    if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread) && BindableConversationItem.isEndOfMessageCluster(current, next, isGroupThread)) {
       topLeft     = defaultRadius;
       topRight    = defaultRadius;
       bottomLeft  = defaultRadius;
       bottomRight = defaultRadius;
-    } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
+    } else if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread)) {
       if (current.isOutgoing()) {
         bottomRight = collapseRadius;
       } else {
         bottomLeft = collapseRadius;
       }
-    } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
+    } else if (BindableConversationItem.isEndOfMessageCluster(current, next, isGroupThread)) {
       if (current.isOutgoing()) {
         topRight = collapseRadius;
       } else {
@@ -580,7 +580,7 @@ public class ConversationItem extends LinearLayout
       bottomRight = 0;
     }
 
-    if (isStartOfMessageCluster(current, previous, isGroupThread) && !current.isOutgoing() && isGroupThread) {
+    if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread) && !current.isOutgoing() && isGroupThread) {
       topLeft  = 0;
       topRight = 0;
     }
@@ -793,7 +793,7 @@ public class ConversationItem extends LinearLayout
                                     @NonNull Optional<MessageRecord> next,
                                              boolean                 isGroupThread)
   {
-    bodyBubble.setBackgroundResource(getCornerBackgroundRes(current, previous, next, isGroupThread));
+    bodyBubble.setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(current, previous, next, isGroupThread));
   }
 
   private void setAuthorTitleVisibility(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
@@ -818,38 +818,6 @@ public class ConversationItem extends LinearLayout
       }
     } else if (contactPhoto != null) {
       contactPhoto.setVisibility(GONE);
-    }
-  }
-
-  private boolean isStartOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
-    if (isGroupThread) {
-      return !previous.isPresent() || previous.get().isUpdate() || !current.getRecipient().getAddress().equals(previous.get().getRecipient().getAddress());
-    } else {
-      return !previous.isPresent() || previous.get().isUpdate() || current.isOutgoing() != previous.get().isOutgoing();
-    }
-  }
-
-  private boolean isEndOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
-    if (isGroupThread) {
-      return !next.isPresent() || next.get().isUpdate() || !current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
-    } else {
-      return !next.isPresent() || next.get().isUpdate() || current.isOutgoing() != next.get().isOutgoing();
-    }
-  }
-
-  private int getCornerBackgroundRes(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
-    if (isStartOfMessageCluster(current, previous, isGroupThread) && isEndOfMessageCluster(current, next, isGroupThread)) {
-      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_alone
-                                  : R.drawable.message_bubble_background_received_alone;
-    } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
-      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_start
-                                  : R.drawable.message_bubble_background_received_start;
-    } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
-      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_end
-                                  : R.drawable.message_bubble_background_received_end;
-    } else {
-      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_middle
-                                  : R.drawable.message_bubble_background_received_middle;
     }
   }
 
