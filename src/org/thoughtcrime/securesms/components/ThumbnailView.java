@@ -44,7 +44,7 @@ import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOption
 
 public class ThumbnailView extends FrameLayout {
 
-  private static final String TAG = ThumbnailView.class.getSimpleName();
+  private static final String TAG        = ThumbnailView.class.getSimpleName();
   private static final int    WIDTH      = 0;
   private static final int    HEIGHT     = 1;
   private static final int    MIN_WIDTH  = 0;
@@ -52,19 +52,15 @@ public class ThumbnailView extends FrameLayout {
   private static final int    MIN_HEIGHT = 2;
   private static final int    MAX_HEIGHT = 3;
 
-  private ImageView       image;
-  private ImageView       shade;
-  private View            playOverlay;
-  private int             backgroundColorHint;
-  private int             topLeftRadius;
-  private int             topRightRadius;
-  private int             bottomLeftRadius;
-  private int             bottomRightRadius;
-  private OnClickListener parentClickListener;
+  private ImageView         image;
+  private ImageView         shade;
+  private View              playOverlay;
+  private CornerMaskingView cornerMask;
+  private OnClickListener   parentClickListener;
 
-  private final int[]   dimens        = new int[2];
-  private final int[]   bounds        = new int[4];
-  private final int[]   measureDimens = new int[2];
+  private final int[] dimens        = new int[2];
+  private final int[] bounds        = new int[4];
+  private final int[] measureDimens = new int[2];
 
   private Optional<TransferControlView> transferControls       = Optional.absent();
   private SlideClickListener            thumbnailClickListener = null;
@@ -87,39 +83,19 @@ public class ThumbnailView extends FrameLayout {
     this.image       = findViewById(R.id.thumbnail_image);
     this.playOverlay = findViewById(R.id.play_overlay);
     this.shade       = findViewById(R.id.shade);
+    this.cornerMask  = findViewById(R.id.corner_mask);
     super.setOnClickListener(new ThumbnailClickDispatcher());
 
     setCornerRadius(getResources().getDimensionPixelSize(R.dimen.message_corner_radius));
-    setWillNotDraw(false);
-
-    setLayerType(LAYER_TYPE_HARDWARE, null);
 
     if (attrs != null) {
       TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ThumbnailView, 0, 0);
-      backgroundColorHint   = typedArray.getColor(R.styleable.ThumbnailView_backgroundColorHint, Color.BLACK);
       bounds[MIN_WIDTH]     = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_minWidth, 0);
       bounds[MAX_WIDTH]     = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxWidth, 0);
       bounds[MIN_HEIGHT]    = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_minHeight, 0);
       bounds[MAX_HEIGHT]    = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxHeight, 0);
       typedArray.recycle();
     }
-  }
-
-  @Override
-  protected void dispatchDraw(Canvas canvas) {
-    super.dispatchDraw(canvas);
-
-    Path roundedCorners = new Path();
-    roundedCorners.addRoundRect(new RectF(0, 0, getWidth(), getHeight()), new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius}, Path.Direction.CW);
-
-    Paint p = new Paint();
-
-    p.setColor(Color.RED);
-    p.setStyle(Paint.Style.FILL);
-    p.setAntiAlias(true);
-    p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
-
-    canvas.drawPath(roundedCorners, p);
   }
 
   @Override
@@ -246,14 +222,7 @@ public class ThumbnailView extends FrameLayout {
   }
 
   public void setCornerRadii(int topLeft, int topRight, int bottomRight, int bottomLeft) {
-    this.topLeftRadius     = topLeft;
-    this.topRightRadius    = topRight;
-    this.bottomRightRadius = bottomRight;
-    this.bottomLeftRadius  = bottomLeft;
-  }
-
-  public void setBackgroundColorHint(int color) {
-    this.backgroundColorHint = color;
+    cornerMask.setRadii(topLeft, topRight, bottomRight, bottomLeft);
   }
 
   public void showShade(boolean showShade) {

@@ -15,6 +15,7 @@ import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.ThemeUtil;
+import org.thoughtcrime.securesms.util.ViewUtil;
 import org.whispersystems.libsignal.util.guava.Optional;
 
 import java.util.Locale;
@@ -79,6 +80,8 @@ public class ConversationCallItem extends RelativeLayout implements BindableConv
 
     callTextView.setText(messageRecord.getDisplayBody());
     dateView.setText(DateUtils.getExtendedRelativeTimeSpanString(getContext(), locale, messageRecord.getDateReceived()));
+
+    ViewUtil.setPaddingBottom(this, BindableConversationItem.getMessageSpacing(getContext(), messageRecord, nextMessageRecord));
   }
 
   @Override

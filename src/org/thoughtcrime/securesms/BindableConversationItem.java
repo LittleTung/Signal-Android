@@ -1,5 +1,7 @@
 package org.thoughtcrime.securesms;
 
+import android.content.Context;
+import android.support.annotation.DimenRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
@@ -68,6 +70,22 @@ public interface BindableConversationItem extends Unbindable {
 
   static boolean isSingularMessage(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
     return isStartOfMessageCluster(current, previous, isGroupThread) && isEndOfMessageCluster(current, next, isGroupThread);
+  }
+
+  static int getMessageSpacing(@NonNull Context context, @NonNull MessageRecord current, @NonNull Optional<MessageRecord> next) {
+    if (next.isPresent()) {
+      boolean recipientsMatch = current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
+      boolean outgoingMatch   = current.isOutgoing() == next.get().isOutgoing();
+
+      if (!recipientsMatch || !outgoingMatch) {
+        return readDimen(context, R.dimen.conversation_vertical_message_spacing_default);
+      }
+    }
+    return readDimen(context, R.dimen.conversation_vertical_message_spacing_collapse);
+  }
+
+  static int readDimen(@NonNull Context context, @DimenRes int dimenId) {
+    return context.getResources().getDimensionPixelOffset(dimenId);
   }
 
   interface EventListener {
