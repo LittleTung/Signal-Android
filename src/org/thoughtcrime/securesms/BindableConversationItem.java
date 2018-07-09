@@ -6,6 +6,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import org.thoughtcrime.securesms.components.CornerMaskingView;
+import org.thoughtcrime.securesms.components.CornerMaskingView.CornerSpec;
 import org.thoughtcrime.securesms.contactshare.Contact;
 import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.database.model.MmsMessageRecord;
@@ -45,6 +47,18 @@ public interface BindableConversationItem extends Unbindable {
     } else {
       return current.isOutgoing() ? R.drawable.message_bubble_background_sent_middle
                                   : R.drawable.message_bubble_background_received_middle;
+    }
+  }
+
+  static CornerSpec getCornerSpec(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    if (isSingularMessage(current, previous, next, isGroupThread)) {
+      return current.isOutgoing() ? BubbleCornerSpec.OUTGOING_ALONE : BubbleCornerSpec.INCOMING_ALONE;
+    } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
+      return current.isOutgoing() ? BubbleCornerSpec.OUTGOING_START : BubbleCornerSpec.INCOMING_START;
+    } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
+      return current.isOutgoing() ? BubbleCornerSpec.OUTGOING_END : BubbleCornerSpec.INCOMING_END;
+    } else {
+      return current.isOutgoing() ? BubbleCornerSpec.OUTGOING_MIDDLE : BubbleCornerSpec.IMCOMING_MIDDLE;
     }
   }
 
@@ -94,5 +108,49 @@ public interface BindableConversationItem extends Unbindable {
     void onAddToContactsClicked(@NonNull Contact contact);
     void onMessageSharedContactClicked(@NonNull List<Recipient> choices);
     void onInviteSharedContactClicked(@NonNull List<Recipient> choices);
+  }
+
+  enum BubbleCornerSpec implements CornerSpec {
+    OUTGOING_ALONE(R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius),
+    OUTGOING_START(R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_collapse_radius, R.dimen.message_corner_radius),
+    OUTGOING_MIDDLE(R.dimen.message_corner_radius, R.dimen.message_corner_collapse_radius, R.dimen.message_corner_collapse_radius, R.dimen.message_corner_radius),
+    OUTGOING_END(R.dimen.message_corner_radius, R.dimen.message_corner_collapse_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius),
+
+    INCOMING_ALONE(R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius),
+    INCOMING_START(R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_collapse_radius),
+    IMCOMING_MIDDLE(R.dimen.message_corner_collapse_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_collapse_radius),
+    INCOMING_END(R.dimen.message_corner_collapse_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius, R.dimen.message_corner_radius);
+
+    private final int topLeft;
+    private final int topRight;
+    private final int bottomRight;
+    private final int bottomLeft;
+
+    BubbleCornerSpec(@DimenRes int topLeft, @DimenRes int topRight, @DimenRes int bottomRight, @DimenRes int bottomLeft) {
+      this.topLeft     = topLeft;
+      this.topRight    = topRight;
+      this.bottomRight = bottomRight;
+      this.bottomLeft  = bottomLeft;
+    }
+
+    @Override
+    public int getTopLeft(@NonNull Context context) {
+      return BindableConversationItem.readDimen(context, topLeft);
+    }
+
+    @Override
+    public int getTopRight(@NonNull Context context) {
+      return BindableConversationItem.readDimen(context, topRight);
+    }
+
+    @Override
+    public int getBottomRight(@NonNull Context context) {
+      return BindableConversationItem.readDimen(context, bottomRight);
+    }
+
+    @Override
+    public int getBottomLeft(@NonNull Context context) {
+      return BindableConversationItem.readDimen(context, bottomLeft);
+    }
   }
 }
