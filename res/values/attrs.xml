@@ -257,4 +257,8 @@
         <attr name="doc_captionColor" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="ConversationItemFooter">
+        <attr name="footer_color" format="color" />
+    </declare-styleable>
+
 </resources>

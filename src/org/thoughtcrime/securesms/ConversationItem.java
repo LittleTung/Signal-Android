@@ -16,7 +16,6 @@
  */
 package org.thoughtcrime.securesms;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -25,7 +24,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.annotation.DimenRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -41,7 +39,6 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,11 +48,12 @@ import org.thoughtcrime.securesms.attachments.DatabaseAttachment;
 import org.thoughtcrime.securesms.components.AlertView;
 import org.thoughtcrime.securesms.components.AudioView;
 import org.thoughtcrime.securesms.components.AvatarImageView;
-import org.thoughtcrime.securesms.components.DeliveryStatusView;
+import org.thoughtcrime.securesms.components.ConversationItemFooter;
 import org.thoughtcrime.securesms.components.DocumentView;
-import org.thoughtcrime.securesms.components.ExpirationTimerView;
 import org.thoughtcrime.securesms.components.QuoteView;
+import org.thoughtcrime.securesms.components.SharedContactView;
 import org.thoughtcrime.securesms.components.ThumbnailView;
+import org.thoughtcrime.securesms.contactshare.Contact;
 import org.thoughtcrime.securesms.database.AttachmentDatabase;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
 import org.thoughtcrime.securesms.database.MmsDatabase;
@@ -74,20 +72,14 @@ import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.mms.PartAuthority;
 import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.SlideClickListener;
-import org.thoughtcrime.securesms.permissions.Permissions;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientModifiedListener;
-import org.thoughtcrime.securesms.service.ExpiringMessageManager;
-import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.LongClickCopySpan;
 import org.thoughtcrime.securesms.util.LongClickMovementMethod;
 import org.thoughtcrime.securesms.util.TextSecurePreferences;
-import org.thoughtcrime.securesms.util.ThemeUtil;
 import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.ViewUtil;
-import org.thoughtcrime.securesms.util.dualsim.SubscriptionInfoCompat;
-import org.thoughtcrime.securesms.util.dualsim.SubscriptionManagerCompat;
 import org.thoughtcrime.securesms.util.views.Stub;
 import org.whispersystems.libsignal.util.guava.Optional;
 
@@ -115,34 +107,32 @@ public class ConversationItem extends LinearLayout
   private Recipient     recipient;
   private GlideRequests glideRequests;
 
-  protected View             bodyBubble;
-  private QuoteView          quoteView;
-  private TextView           bodyText;
-  private ViewGroup          footer;
-  private TextView           dateText;
-  private TextView           simInfoText;
-  private TextView           indicatorText;
-  private TextView           groupSender;
-  private TextView           groupSenderProfileName;
-  private View               groupSenderHolder;
-  private ImageView          insecureImage;
-  private AvatarImageView    contactPhoto;
-  private DeliveryStatusView deliveryStatusIndicator;
-  private AlertView          alertView;
-  private ViewGroup          container;
+  protected View                 bodyBubble;
+  private QuoteView              quoteView;
+  private TextView               bodyText;
+  private ConversationItemFooter footer;
+  private TextView               indicatorText;
+  private TextView               groupSender;
+  private TextView               groupSenderProfileName;
+  private View                   groupSenderHolder;
+  private AvatarImageView        contactPhoto;
+  private AlertView              alertView;
+  private ViewGroup              container;
 
   private @NonNull  Set<MessageRecord>      batchSelected = new HashSet<>();
   private @NonNull  Recipient               conversationRecipient;
   private @NonNull  Stub<ThumbnailView>     mediaThumbnailStub;
   private @NonNull  Stub<AudioView>         audioViewStub;
   private @NonNull  Stub<DocumentView>      documentViewStub;
-  private @NonNull  ExpirationTimerView     expirationTimer;
+  private @NonNull  Stub<SharedContactView> sharedContactStub;
   private @Nullable EventListener           eventListener;
 
   private int defaultBubbleColor;
 
   private final PassthroughClickListener        passthroughClickListener   = new PassthroughClickListener();
   private final AttachmentDownloadClickListener downloadClickListener      = new AttachmentDownloadClickListener();
+  private final SharedContactEventListener      sharedContactEventListener = new SharedContactEventListener();
+  private final SharedContactClickListener      sharedContactClickListener = new SharedContactClickListener();
 
   private final Context context;
 
@@ -168,20 +158,16 @@ public class ConversationItem extends LinearLayout
 
     this.bodyText                =            findViewById(R.id.conversation_item_body);
     this.footer                  =            findViewById(R.id.conversation_item_footer);
-    this.dateText                =            findViewById(R.id.conversation_item_date);
-    this.simInfoText             =            findViewById(R.id.sim_info);
     this.indicatorText           =            findViewById(R.id.indicator_text);
     this.groupSender             =            findViewById(R.id.group_message_sender);
     this.groupSenderProfileName  =            findViewById(R.id.group_message_sender_profile);
-    this.insecureImage           =            findViewById(R.id.insecure_indicator);
-    this.deliveryStatusIndicator =            findViewById(R.id.delivery_status);
     this.alertView               =            findViewById(R.id.indicators_parent);
     this.contactPhoto            =            findViewById(R.id.contact_photo);
     this.bodyBubble              =            findViewById(R.id.body_bubble);
     this.mediaThumbnailStub      = new Stub<>(findViewById(R.id.image_view_stub));
     this.audioViewStub           = new Stub<>(findViewById(R.id.audio_view_stub));
     this.documentViewStub        = new Stub<>(findViewById(R.id.document_view_stub));
-    this.expirationTimer         =            findViewById(R.id.expiration_indicator);
+    this.sharedContactStub       = new Stub<>(findViewById(R.id.shared_contact_view_stub));
     this.groupSenderHolder       =            findViewById(R.id.group_sender_holder);
     this.quoteView               =            findViewById(R.id.quote_view);
     this.container               =            findViewById(R.id.container);
@@ -216,24 +202,22 @@ public class ConversationItem extends LinearLayout
     this.conversationRecipient.addListener(this);
 
     ViewUtil.updateLayoutParams(footer, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-    dateText.forceLayout();
 
-    setMessageBackground(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
-    setMediaAttributes(messageRecord, previousMessageRecord, nextMessageRecord, conversationRecipient, groupThread);
-    setInteractionState(messageRecord, pulseHighlight);
-    setBodyText(messageRecord);
-    setBubbleState(messageRecord, conversationRecipient);
-    setStatusIcons(messageRecord);
-    setContactPhoto(recipient);
-    setGroupMessageStatus(messageRecord, recipient);
+    presentMessageBackground(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
+    presentMedia(messageRecord, previousMessageRecord, nextMessageRecord, conversationRecipient, groupThread);
+    presentInteractionState(messageRecord, pulseHighlight);
+    presentBodyText(messageRecord);
+    presentBubbleState(messageRecord);
+    presentStatusIcons(messageRecord);
+    presentContactPhoto(recipient);
+    presentGroupMessageStatus(messageRecord, recipient);
     setMinimumWidth();
-    setSimInfo(messageRecord);
-    setExpiration(messageRecord);
-    setQuote(messageRecord);
+    presentQuote(messageRecord);
     ViewUtil.setPaddingBottom(this, BindableConversationItem.getMessageSpacing(context, messageRecord, nextMessageRecord));
     setMessageMargins(messageRecord, groupThread);
     setAuthorTitleVisibility(messageRecord, previousMessageRecord, groupThread);
     setAuthorAvatarVisibility(messageRecord, nextMessageRecord, groupThread);
+    presentFooter(messageRecord, locale);
   }
 
   @Override
@@ -288,9 +272,11 @@ public class ConversationItem extends LinearLayout
       }
     }
 
-    int availableWidth = getAvailableMessageBubbleWidth(footer);
-    if (footer.getMeasuredWidth() != availableWidth) {
-      footer.getLayoutParams().width = availableWidth;
+    ConversationItemFooter activeFooter   = getActiveFooter(messageRecord);
+    int                    availableWidth = getAvailableMessageBubbleWidth(footer);
+
+    if (activeFooter.getVisibility() != GONE && activeFooter.getMeasuredWidth() != availableWidth) {
+      activeFooter.getLayoutParams().width = availableWidth;
       needsMeasure = true;
     }
 
@@ -327,8 +313,6 @@ public class ConversationItem extends LinearLayout
     if (recipient != null) {
       recipient.removeListener(this);
     }
-
-    this.expirationTimer.stopAnimation();
   }
 
   public MessageRecord getMessageRecord() {
@@ -337,7 +321,7 @@ public class ConversationItem extends LinearLayout
 
   /// MessageRecord Attribute Parsers
 
-  private void setBubbleState(MessageRecord messageRecord, Recipient conversationRecipient) {
+  private void presentBubbleState(MessageRecord messageRecord) {
     if (messageRecord.isOutgoing()) {
       bodyBubble.getBackground().setColorFilter(defaultBubbleColor, PorterDuff.Mode.MULTIPLY);
     } else {
@@ -362,7 +346,7 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void setInteractionState(MessageRecord messageRecord, boolean pulseHighlight) {
+  private void presentInteractionState(MessageRecord messageRecord, boolean pulseHighlight) {
     if (batchSelected.contains(messageRecord)) {
       setBackgroundResource(R.drawable.conversation_item_background);
       setSelected(true);
@@ -412,7 +396,11 @@ public class ConversationItem extends LinearLayout
     return messageRecord.isMms() && ((MmsMessageRecord)messageRecord).getQuote() != null;
   }
 
-  private void setBodyText(MessageRecord messageRecord) {
+  private boolean hasSharedContact(MessageRecord messageRecord) {
+    return messageRecord.isMms() && !((MmsMessageRecord)messageRecord).getSharedContacts().isEmpty();
+  }
+
+  private void presentBodyText(MessageRecord messageRecord) {
     bodyText.setClickable(false);
     bodyText.setFocusable(false);
     bodyText.setTextSize(TypedValue.COMPLEX_UNIT_SP, TextSecurePreferences.getMessageBodyTextSize(context));
@@ -425,11 +413,11 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void setMediaAttributes(@NonNull MessageRecord           currentMessage,
-                                  @NonNull Optional<MessageRecord> previousMessage,
-                                  @NonNull Optional<MessageRecord> nextMessage,
-                                  @NonNull Recipient               conversationRecipient,
-                                           boolean                 isGroupThread)
+  private void presentMedia(@NonNull MessageRecord           currentMessage,
+                            @NonNull Optional<MessageRecord> previousMessage,
+                            @NonNull Optional<MessageRecord> nextMessage,
+                            @NonNull Recipient               conversationRecipient,
+                            boolean                 isGroupThread)
   {
     boolean showControls = !currentMessage.isFailed() && !Util.isOwnNumber(context, conversationRecipient.getAddress());
 
@@ -438,13 +426,26 @@ public class ConversationItem extends LinearLayout
     ViewUtil.setPaddingBottom(bodyBubble, 0);
     ViewUtil.setTopMargin(footer, readDimen(R.dimen.message_bubble_footer_top_padding));
     ViewUtil.setBottomMargin(footer, readDimen(R.dimen.message_bubble_bottom_padding));
-    dateText.setTextAppearance(context, currentMessage.isOutgoing() ? R.style.Signal_Text_Caption_MessageSent : R.style.Signal_Text_Caption_MessageReceived);
-    deliveryStatusIndicator.setTint(ThemeUtil.getThemedColor(context, R.attr.conversation_item_sent_text_secondary_color));
 
-    if (hasAudio(currentMessage)) {
+    footer.setVisibility(VISIBLE);
+
+    if (hasSharedContact(currentMessage)) {
+      sharedContactStub.get().setVisibility(VISIBLE);
+      if (audioViewStub.resolved())      mediaThumbnailStub.get().setVisibility(View.GONE);
+      if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().setVisibility(View.GONE);
+      if (documentViewStub.resolved())   documentViewStub.get().setVisibility(View.GONE);
+
+      sharedContactStub.get().setContact(((MediaMmsMessageRecord) currentMessage).getSharedContacts().get(0), glideRequests, locale);
+      sharedContactStub.get().setEventListener(sharedContactEventListener);
+      sharedContactStub.get().setOnClickListener(sharedContactClickListener);
+      sharedContactStub.get().setOnLongClickListener(passthroughClickListener);
+
+      footer.setVisibility(GONE);
+    } else if (hasAudio(currentMessage)) {
       audioViewStub.get().setVisibility(View.VISIBLE);
       if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().setVisibility(View.GONE);
       if (documentViewStub.resolved())   documentViewStub.get().setVisibility(View.GONE);
+      if (sharedContactStub.resolved())  sharedContactStub.get().setVisibility(GONE);
 
       //noinspection ConstantConditions
       audioViewStub.get().setAudio(((MediaMmsMessageRecord) currentMessage).getSlideDeck().getAudioSlide(), showControls);
@@ -454,6 +455,7 @@ public class ConversationItem extends LinearLayout
       documentViewStub.get().setVisibility(View.VISIBLE);
       if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().setVisibility(View.GONE);
       if (audioViewStub.resolved())      audioViewStub.get().setVisibility(View.GONE);
+      if (sharedContactStub.resolved())  sharedContactStub.get().setVisibility(GONE);
 
       //noinspection ConstantConditions
       documentViewStub.get().setDocument(((MediaMmsMessageRecord)currentMessage).getSlideDeck().getDocumentSlide(), showControls);
@@ -464,6 +466,7 @@ public class ConversationItem extends LinearLayout
       mediaThumbnailStub.get().setVisibility(View.VISIBLE);
       if (audioViewStub.resolved())    audioViewStub.get().setVisibility(View.GONE);
       if (documentViewStub.resolved()) documentViewStub.get().setVisibility(View.GONE);
+      if (sharedContactStub.resolved())  sharedContactStub.get().setVisibility(GONE);
 
       setThumbnailCorners(currentMessage, previousMessage, nextMessage, isGroupThread);
 
@@ -493,8 +496,6 @@ public class ConversationItem extends LinearLayout
       if (TextUtils.isEmpty(currentMessage.getDisplayBody())) {
         ViewUtil.setTopMargin(footer, getImageFooterDisplacement());
         ViewUtil.setBottomMargin(footer, 0);
-        dateText.setTextAppearance(context, R.style.Signal_Text_Caption_MessageImageOverlay);
-        deliveryStatusIndicator.setTint(getContext().getResources().getColor(R.color.core_white));
         mediaThumbnailStub.get().setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
 
         if (!isGroupThread || !BindableConversationItem.isStartOfMessageCluster(currentMessage, previousMessage, isGroupThread)) {
@@ -505,6 +506,7 @@ public class ConversationItem extends LinearLayout
       if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().setVisibility(View.GONE);
       if (audioViewStub.resolved())      audioViewStub.get().setVisibility(View.GONE);
       if (documentViewStub.resolved())   documentViewStub.get().setVisibility(View.GONE);
+      if (sharedContactStub.resolved())  sharedContactStub.get().setVisibility(GONE);
     }
   }
 
@@ -561,7 +563,7 @@ public class ConversationItem extends LinearLayout
     mediaThumbnailStub.get().setCornerRadii(topLeft, topRight, bottomRight, bottomLeft);
   }
 
-  private void setContactPhoto(@NonNull Recipient recipient) {
+  private void presentContactPhoto(@NonNull Recipient recipient) {
     if (contactPhoto == null) return;
 
     if (messageRecord.isOutgoing() || !groupThread) {
@@ -586,12 +588,10 @@ public class ConversationItem extends LinearLayout
     return messageBody;
   }
 
-  private void setStatusIcons(MessageRecord messageRecord) {
+  private void presentStatusIcons(MessageRecord messageRecord) {
     indicatorText.setVisibility(View.GONE);
 
-    insecureImage.setVisibility(messageRecord.isSecure() ? View.GONE : View.VISIBLE);
     bodyText.setCompoundDrawablesWithIntrinsicBounds(0, 0, messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0);
-    dateText.setText(DateUtils.getExtendedRelativeTimeSpanString(getContext(), locale, messageRecord.getTimestamp()));
 
     if (messageRecord.isFailed()) {
       setFailedStatusIcons();
@@ -599,71 +599,10 @@ public class ConversationItem extends LinearLayout
       setFallbackStatusIcons();
     } else {
       alertView.setNone();
-
-      if      (!messageRecord.isOutgoing())  deliveryStatusIndicator.setNone();
-      else if (messageRecord.isPending())    deliveryStatusIndicator.setPending();
-      else if (messageRecord.isRemoteRead()) deliveryStatusIndicator.setRead();
-      else if (messageRecord.isDelivered())  deliveryStatusIndicator.setDelivered();
-      else                                   deliveryStatusIndicator.setSent();
     }
   }
 
-  private void setSimInfo(MessageRecord messageRecord) {
-    SubscriptionManagerCompat subscriptionManager = new SubscriptionManagerCompat(context);
-
-    if (messageRecord.getSubscriptionId() == -1 || !Permissions.hasAll(context, Manifest.permission.READ_PHONE_STATE) || subscriptionManager.getActiveSubscriptionInfoList().size() < 2) {
-      simInfoText.setVisibility(View.GONE);
-    } else {
-      Optional<SubscriptionInfoCompat> subscriptionInfo = subscriptionManager.getActiveSubscriptionInfo(messageRecord.getSubscriptionId());
-
-      if (subscriptionInfo.isPresent() && messageRecord.isOutgoing()) {
-        simInfoText.setText(getContext().getString(R.string.ConversationItem_from_s, subscriptionInfo.get().getDisplayName()));
-        simInfoText.setVisibility(View.VISIBLE);
-      } else if (subscriptionInfo.isPresent()) {
-        simInfoText.setText(getContext().getString(R.string.ConversationItem_to_s,  subscriptionInfo.get().getDisplayName()));
-        simInfoText.setVisibility(View.VISIBLE);
-      } else {
-        simInfoText.setVisibility(View.GONE);
-      }
-    }
-  }
-
-  @SuppressLint("StaticFieldLeak")
-  private void setExpiration(final MessageRecord messageRecord) {
-    if (messageRecord.getExpiresIn() > 0) {
-      this.expirationTimer.setVisibility(View.VISIBLE);
-      this.expirationTimer.setPercentage(0);
-
-      if (messageRecord.getExpireStarted() > 0) {
-        this.expirationTimer.setExpirationTime(messageRecord.getExpireStarted(),
-                                               messageRecord.getExpiresIn());
-        this.expirationTimer.startAnimation();
-
-        if (messageRecord.getExpireStarted() + messageRecord.getExpiresIn() <= System.currentTimeMillis()) {
-          ApplicationContext.getInstance(context).getExpiringMessageManager().checkSchedule();
-        }
-      } else if (!messageRecord.isOutgoing() && !messageRecord.isMediaPending()) {
-        new AsyncTask<Void, Void, Void>() {
-          @Override
-          protected Void doInBackground(Void... params) {
-            ExpiringMessageManager expirationManager = ApplicationContext.getInstance(context).getExpiringMessageManager();
-            long                   id                = messageRecord.getId();
-            boolean                mms               = messageRecord.isMms();
-
-            if (mms) DatabaseFactory.getMmsDatabase(context).markExpireStarted(id);
-            else     DatabaseFactory.getSmsDatabase(context).markExpireStarted(id);
-
-            expirationManager.scheduleDeletion(id, mms, messageRecord.getExpiresIn());
-            return null;
-          }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-      }
-    } else {
-      this.expirationTimer.setVisibility(View.GONE);
-    }
-  }
-
-  private void setQuote(@NonNull MessageRecord messageRecord) {
+  private void presentQuote(@NonNull MessageRecord messageRecord) {
     if (messageRecord.isMms() && !messageRecord.isMmsNotification() && ((MediaMmsMessageRecord)messageRecord).getQuote() != null) {
       Quote quote = ((MediaMmsMessageRecord)messageRecord).getQuote();
       assert quote != null;
@@ -685,9 +624,6 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void setMessageSpacing(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next) {
-  }
-
   private void setMessageMargins(@NonNull MessageRecord message, boolean isGroupThread) {
     if (isGroupThread) {
       if (message.isOutgoing()) {
@@ -704,10 +640,10 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void setMessageBackground(@NonNull MessageRecord           current,
-                                    @NonNull Optional<MessageRecord> previous,
-                                    @NonNull Optional<MessageRecord> next,
-                                             boolean                 isGroupThread)
+  private void presentMessageBackground(@NonNull MessageRecord           current,
+                                        @NonNull Optional<MessageRecord> previous,
+                                        @NonNull Optional<MessageRecord> next,
+                                        boolean                 isGroupThread)
   {
     bodyBubble.setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(current, previous, next, isGroupThread));
   }
@@ -737,6 +673,26 @@ public class ConversationItem extends LinearLayout
     }
   }
 
+  private void presentFooter(@NonNull MessageRecord messageRecord, @NonNull Locale locale) {
+    if (hasSharedContact(messageRecord)) {
+      sharedContactStub.get().getFooter().setVisibility(VISIBLE);
+      sharedContactStub.get().getFooter().setMessageRecord(messageRecord, locale);
+      footer.setVisibility(GONE);
+    } else {
+      if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
+      footer.setVisibility(VISIBLE);
+      footer.setMessageRecord(messageRecord, locale);
+    }
+  }
+
+  private ConversationItemFooter getActiveFooter(@NonNull MessageRecord messageRecord) {
+    if (hasSharedContact(messageRecord)) {
+      return sharedContactStub.get().getFooter();
+    }
+
+    return footer;
+  }
+
   private int readDimen(@DimenRes int dimenId) {
     return context.getResources().getDimensionPixelOffset(dimenId);
   }
@@ -748,8 +704,6 @@ public class ConversationItem extends LinearLayout
 
   private void setFailedStatusIcons() {
     alertView.setFailed();
-    deliveryStatusIndicator.setNone();
-    dateText.setText(R.string.ConversationItem_error_not_delivered);
 
     if (messageRecord.isOutgoing()) {
       indicatorText.setText(R.string.ConversationItem_click_for_details);
@@ -759,7 +713,6 @@ public class ConversationItem extends LinearLayout
 
   private void setFallbackStatusIcons() {
     alertView.setPendingApproval();
-    deliveryStatusIndicator.setNone();
     indicatorText.setVisibility(View.VISIBLE);
     indicatorText.setText(R.string.ConversationItem_click_to_approve_unencrypted);
   }
@@ -781,7 +734,7 @@ public class ConversationItem extends LinearLayout
   }
 
   @SuppressLint("SetTextI18n")
-  private void setGroupMessageStatus(MessageRecord messageRecord, Recipient recipient) {
+  private void presentGroupMessageStatus(MessageRecord messageRecord, Recipient recipient) {
     this.groupSender.setText(recipient.toShortString());
 
     if (recipient.getName() == null && !TextUtils.isEmpty(recipient.getProfileName())) {
@@ -808,11 +761,51 @@ public class ConversationItem extends LinearLayout
   @Override
   public void onModified(final Recipient modified) {
     Util.runOnMain(() -> {
-      setBubbleState(messageRecord, conversationRecipient);
-      setContactPhoto(recipient);
-      setGroupMessageStatus(messageRecord, recipient);
+      presentBubbleState(messageRecord);
+      presentContactPhoto(recipient);
+      presentGroupMessageStatus(messageRecord, recipient);
       setAudioViewTint(messageRecord, conversationRecipient);
     });
+  }
+
+  private class SharedContactEventListener implements SharedContactView.EventListener {
+    @Override
+    public void onAddToContactsClicked(@NonNull Contact contact) {
+      if (eventListener != null && batchSelected.isEmpty()) {
+        eventListener.onAddToContactsClicked(contact);
+      } else {
+        passthroughClickListener.onClick(sharedContactStub.get());
+      }
+    }
+
+    @Override
+    public void onInviteClicked(@NonNull List<Recipient> choices) {
+      if (eventListener != null && batchSelected.isEmpty()) {
+        eventListener.onInviteSharedContactClicked(choices);
+      } else {
+        passthroughClickListener.onClick(sharedContactStub.get());
+      }
+    }
+
+    @Override
+    public void onMessageClicked(@NonNull List<Recipient> choices) {
+      if (eventListener != null && batchSelected.isEmpty()) {
+        eventListener.onMessageSharedContactClicked(choices);
+      } else {
+        passthroughClickListener.onClick(sharedContactStub.get());
+      }
+    }
+  }
+
+  private class SharedContactClickListener implements View.OnClickListener {
+    @Override
+    public void onClick(View view) {
+      if (eventListener != null && batchSelected.isEmpty() && messageRecord.isMms() && !((MmsMessageRecord) messageRecord).getSharedContacts().isEmpty()) {
+        eventListener.onSharedContactDetailsClicked(((MmsMessageRecord) messageRecord).getSharedContacts().get(0), sharedContactStub.get().getAvatarView());
+      } else {
+        passthroughClickListener.onClick(view);
+      }
+    }
   }
 
   private class AttachmentDownloadClickListener implements SlideClickListener {

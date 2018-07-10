@@ -36,10 +36,11 @@ import java.util.Map;
 
 public class SharedContactView extends LinearLayout implements RecipientModifiedListener {
 
-  private ImageView avatarView;
-  private TextView  nameView;
-  private TextView  numberView;
-  private TextView  actionButtonView;
+  private ImageView              avatarView;
+  private TextView               nameView;
+  private TextView               numberView;
+  private TextView               actionButtonView;
+  private ConversationItemFooter footer;
 
   private Contact       contact;
   private Locale        locale;
@@ -76,6 +77,7 @@ public class SharedContactView extends LinearLayout implements RecipientModified
     nameView         = findViewById(R.id.contact_name);
     numberView       = findViewById(R.id.contact_number);
     actionButtonView = findViewById(R.id.contact_action_button);
+    footer           = findViewById(R.id.contact_footer);
 
     if (attrs != null) {
       TypedArray typedArray   = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SharedContactView, 0, 0);
@@ -85,6 +87,7 @@ public class SharedContactView extends LinearLayout implements RecipientModified
 
       nameView.setTextColor(titleColor);
       numberView.setTextColor(captionColor);
+      footer.setColor(captionColor);
     }
   }
 
@@ -107,6 +110,10 @@ public class SharedContactView extends LinearLayout implements RecipientModified
 
   public @NonNull View getAvatarView() {
     return avatarView;
+  }
+
+  public ConversationItemFooter getFooter() {
+    return footer;
   }
 
   @Override

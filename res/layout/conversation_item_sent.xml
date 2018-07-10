@@ -60,6 +60,13 @@
                 tools:visibility="visible"/>
 
             <ViewStub
+                android:id="@+id/shared_contact_view_stub"
+                android:layout="@layout/conversation_item_sent_shared_contact"
+                android:layout_width="@dimen/media_bubble_default_dimens"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
+            <ViewStub
                 android:id="@+id/image_view_stub"
                 android:layout_width="@dimen/media_bubble_default_dimens"
                 android:layout_height="@dimen/media_bubble_default_dimens"
@@ -93,8 +100,25 @@
                 app:scaleEmojis="true"
                 tools:text="Mango pickle lorem ipsum"/>
 
-            <include
-                layout="@layout/conversation_item_sent_footer"
+            <View
+                android:id="@+id/group_sender_holder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/group_message_sender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/group_message_sender_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone" />
+
+            <org.thoughtcrime.securesms.components.ConversationItemFooter
                 android:id="@+id/conversation_item_footer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -102,7 +126,8 @@
                 android:layout_marginRight="@dimen/message_bubble_horizontal_padding"
                 android:layout_marginTop="@dimen/message_bubble_footer_top_padding"
                 android:elevation="9dp"
-                android:layout_marginBottom="@dimen/message_bubble_bottom_padding" />
+                android:layout_marginBottom="@dimen/message_bubble_bottom_padding"
+                app:footer_color="?conversation_item_sent_text_secondary_color"/>
 
         </LinearLayout>
 
