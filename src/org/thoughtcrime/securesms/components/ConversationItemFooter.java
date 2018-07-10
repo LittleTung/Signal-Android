@@ -7,7 +7,6 @@ import android.content.res.TypedArray;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -21,7 +20,6 @@ import org.thoughtcrime.securesms.database.model.MessageRecord;
 import org.thoughtcrime.securesms.permissions.Permissions;
 import org.thoughtcrime.securesms.service.ExpiringMessageManager;
 import org.thoughtcrime.securesms.util.DateUtils;
-import org.thoughtcrime.securesms.util.ThemeUtil;
 import org.thoughtcrime.securesms.util.dualsim.SubscriptionInfoCompat;
 import org.thoughtcrime.securesms.util.dualsim.SubscriptionManagerCompat;
 import org.whispersystems.libsignal.util.guava.Optional;
@@ -62,7 +60,7 @@ public class ConversationItemFooter extends LinearLayout {
 
     if (attrs != null) {
       TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.ConversationItemFooter, 0, 0);
-      setColor(typedArray.getInt(R.styleable.ConversationItemFooter_footer_color, 0));
+      setColor(typedArray.getInt(R.styleable.ConversationItemFooter_footer_color, getResources().getColor(R.color.core_white)));
       typedArray.recycle();
     }
   }
@@ -159,9 +157,6 @@ public class ConversationItemFooter extends LinearLayout {
   }
 
   private void presentDeliveryStatus(@NonNull MessageRecord messageRecord) {
-    // TODO: Read as attr
-    deliveryStatusView.setTint(ThemeUtil.getThemedColor(getContext(), R.attr.conversation_item_sent_text_secondary_color));
-
     if (!messageRecord.isFailed() && !messageRecord.isPendingInsecureSmsFallback()) {
       if      (!messageRecord.isOutgoing())  deliveryStatusView.setNone();
       else if (messageRecord.isPending())    deliveryStatusView.setPending();
@@ -172,5 +167,4 @@ public class ConversationItemFooter extends LinearLayout {
       deliveryStatusView.setNone();
     }
   }
-
 }

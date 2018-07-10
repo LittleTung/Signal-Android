@@ -42,17 +42,11 @@ public class DeliveryStatusView extends FrameLayout {
     this.pendingIndicator     = findViewById(R.id.pending_indicator);
     this.readIndicator        = findViewById(R.id.read_indicator);
 
-    int iconColor = Color.GRAY;
-
     if (attrs != null) {
       TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DeliveryStatusView, 0, 0);
-      iconColor = typedArray.getColor(R.styleable.DeliveryStatusView_iconColor, iconColor);
+      setTint(typedArray.getColor(R.styleable.DeliveryStatusView_iconColor, getResources().getColor(R.color.core_white)));
       typedArray.recycle();
     }
-
-    pendingIndicator.setColorFilter(iconColor, android.graphics.PorterDuff.Mode.MULTIPLY);
-    deliveredIndicator.setColorFilter(iconColor, android.graphics.PorterDuff.Mode.MULTIPLY);
-    sentIndicator.setColorFilter(iconColor, android.graphics.PorterDuff.Mode.MULTIPLY);
   }
 
   public void setNone() {
@@ -92,8 +86,9 @@ public class DeliveryStatusView extends FrameLayout {
   }
 
   public void setTint(int color) {
-    pendingIndicator.setColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY);
-    deliveredIndicator.setColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY);
-    sentIndicator.setColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY);
+    pendingIndicator.setColorFilter(color);
+    deliveredIndicator.setColorFilter(color);
+    sentIndicator.setColorFilter(color);
+    readIndicator.setColorFilter(color);
   }
 }

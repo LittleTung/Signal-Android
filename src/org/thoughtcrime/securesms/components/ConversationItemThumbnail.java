@@ -66,8 +66,12 @@ public class ConversationItemThumbnail extends FrameLayout {
 
   @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    getLayoutParams().width = shade.getLayoutParams().width = thumbnail.getMeasuredWidth();
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+    if (getMeasuredWidth() != thumbnail.getMeasuredWidth()) {
+      getLayoutParams().width = shade.getLayoutParams().width = thumbnail.getMeasuredWidth();
+      measure(widthMeasureSpec, heightMeasureSpec);
+    }
   }
 
   @Override

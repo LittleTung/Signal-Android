@@ -53,7 +53,6 @@ import org.thoughtcrime.securesms.components.ConversationItemThumbnail;
 import org.thoughtcrime.securesms.components.DocumentView;
 import org.thoughtcrime.securesms.components.QuoteView;
 import org.thoughtcrime.securesms.components.SharedContactView;
-import org.thoughtcrime.securesms.components.ThumbnailView;
 import org.thoughtcrime.securesms.contactshare.Contact;
 import org.thoughtcrime.securesms.database.AttachmentDatabase;
 import org.thoughtcrime.securesms.database.DatabaseFactory;
@@ -201,8 +200,6 @@ public class ConversationItem extends LinearLayout
 
     this.recipient.addListener(this);
     this.conversationRecipient.addListener(this);
-
-    ViewUtil.updateLayoutParams(footer, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
     presentMessageBackground(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
     presentMedia(messageRecord, previousMessageRecord, nextMessageRecord, conversationRecipient, groupThread);
@@ -425,8 +422,6 @@ public class ConversationItem extends LinearLayout
     ViewUtil.updateLayoutParams(bodyText, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     ViewUtil.setPaddingTop(bodyBubble, readDimen(R.dimen.message_bubble_top_padding));
     ViewUtil.setPaddingBottom(bodyBubble, 0);
-    ViewUtil.setTopMargin(footer, readDimen(R.dimen.message_bubble_footer_top_padding));
-    ViewUtil.setBottomMargin(footer, readDimen(R.dimen.message_bubble_bottom_padding));
 
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().showShade(false);
 
@@ -496,8 +491,6 @@ public class ConversationItem extends LinearLayout
       }
 
       if (TextUtils.isEmpty(currentMessage.getDisplayBody())) {
-        ViewUtil.setTopMargin(footer, getImageFooterDisplacement());
-        ViewUtil.setBottomMargin(footer, 0);
         mediaThumbnailStub.get().showShade(true);
         mediaThumbnailStub.get().setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
 
@@ -677,6 +670,8 @@ public class ConversationItem extends LinearLayout
   }
 
   private void presentFooter(@NonNull MessageRecord messageRecord, @NonNull Locale locale) {
+    ViewUtil.updateLayoutParams(footer, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
     footer.setVisibility(GONE);
     if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
@@ -705,11 +700,6 @@ public class ConversationItem extends LinearLayout
 
   private int readDimen(@DimenRes int dimenId) {
     return context.getResources().getDimensionPixelOffset(dimenId);
-  }
-
-  private int getImageFooterDisplacement() {
-    return readDimen(R.dimen.message_bubble_footer_image_displacement_dp) +
-           readDimen(R.dimen.message_bubble_footer_image_displacement_sp);
   }
 
   private void setFailedStatusIcons() {

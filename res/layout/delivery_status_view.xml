@@ -34,7 +34,7 @@
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
                android:layout_gravity="center_vertical|end"
-               android:src="@drawable/ic_delivery_status_delivered"
+               android:src="@drawable/ic_delivery_status_read"
                android:paddingLeft="2dp"
                android:visibility="gone"
                android:contentDescription="@string/conversation_item_sent__message_read"
