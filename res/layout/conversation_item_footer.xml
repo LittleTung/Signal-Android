@@ -40,16 +40,11 @@
 
     <org.thoughtcrime.securesms.components.ExpirationTimerView
         android:id="@+id/footer_expiration_timer"
-        app:empty="@drawable/ic_hourglass_empty_white_18dp"
-        app:full="@drawable/ic_hourglass_full_white_18dp"
-        app:percentage="0"
-        app:offset="0"
         android:layout_gravity="center_vertical|end"
-        android:alpha=".6"
         android:layout_marginLeft="6dp"
         android:layout_marginStart="6dp"
-        android:layout_width="7dp"
-        android:layout_height="11dp"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
         android:visibility="gone"
         tools:visibility="visible"/>
 

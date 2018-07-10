@@ -82,7 +82,7 @@ public class ConversationItemFooter extends LinearLayout {
   public void setColor(int color) {
     dateView.setTextColor(color);
     simView.setTextColor(color);
-    timerView.setTint(color);
+    timerView.setColorFilter(color);
     insecureIndicatorView.setColorFilter(color);
     deliveryStatusView.setTint(color);
   }
@@ -119,9 +119,9 @@ public class ConversationItemFooter extends LinearLayout {
 
   @SuppressLint("StaticFieldLeak")
   private void presentTimer(@NonNull final MessageRecord messageRecord) {
-    if (messageRecord.getExpiresIn() > 0) {
+    if (messageRecord.getExpiresIn() > 0 && !messageRecord.isPending()) {
       this.timerView.setVisibility(View.VISIBLE);
-      this.timerView.setPercentage(0);
+      this.timerView.setPercentComplete(0);
 
       if (messageRecord.getExpireStarted() > 0) {
         this.timerView.setExpirationTime(messageRecord.getExpireStarted(),
