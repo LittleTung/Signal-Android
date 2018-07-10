@@ -175,7 +175,7 @@ public abstract class MessageRecord extends DisplayRecord {
   }
 
   public boolean isUpdate() {
-    return isGroupAction() || isJoined() || isExpirationTimerUpdate() ||
+    return isGroupAction() || isJoined() || isExpirationTimerUpdate() || isCallLog() ||
            isEndSession()  || isIdentityUpdate() || isIdentityVerified() || isIdentityDefault();
   }
 

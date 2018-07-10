@@ -98,6 +98,7 @@ public class ConversationUpdateItem extends LinearLayout
     this.sender.addListener(this);
 
     if      (messageRecord.isGroupAction())           setGroupRecord(messageRecord);
+    else if (messageRecord.isCallLog())               setCallRecord(messageRecord);
     else if (messageRecord.isJoined())                setJoinedRecord(messageRecord);
     else if (messageRecord.isExpirationTimerUpdate()) setTimerRecord(messageRecord);
     else if (messageRecord.isEndSession())            setEndSessionRecord(messageRecord);
@@ -108,6 +109,16 @@ public class ConversationUpdateItem extends LinearLayout
 
     if (batchSelected.contains(messageRecord)) setSelected(true);
     else                                       setSelected(false);
+  }
+
+  private void setCallRecord(MessageRecord messageRecord) {
+    if      (messageRecord.isIncomingCall()) icon.setImageResource(R.drawable.ic_call_received_grey600_24dp);
+    else if (messageRecord.isOutgoingCall()) icon.setImageResource(R.drawable.ic_call_made_grey600_24dp);
+    else                                     icon.setImageResource(R.drawable.ic_call_missed_grey600_24dp);
+
+    body.setText(messageRecord.getDisplayBody());
+    date.setText(DateUtils.getExtendedRelativeTimeSpanString(getContext(), locale, messageRecord.getDateReceived()));
+    date.setVisibility(View.VISIBLE);
   }
 
   private void setTimerRecord(final MessageRecord messageRecord) {
