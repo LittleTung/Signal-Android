@@ -261,4 +261,11 @@
         <attr name="footer_color" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="ConversationItemThumbnail">
+        <attr name="conversationThumbnail_minWidth" format="dimension" />
+        <attr name="conversationThumbnail_maxWidth" format="dimension" />
+        <attr name="conversationThumbnail_minHeight" format="dimension" />
+        <attr name="conversationThumbnail_maxHeight" format="dimension" />
+    </declare-styleable>
+
 </resources>

@@ -35,6 +35,7 @@ import org.thoughtcrime.securesms.mms.GlideRequest;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.SlideClickListener;
+import org.thoughtcrime.securesms.util.Util;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.whispersystems.libsignal.util.guava.Optional;
 
@@ -53,9 +54,7 @@ public class ThumbnailView extends FrameLayout {
   private static final int    MAX_HEIGHT = 3;
 
   private ImageView         image;
-  private ImageView         shade;
   private View              playOverlay;
-  private CornerMaskingView cornerMask;
   private OnClickListener   parentClickListener;
 
   private final int[] dimens        = new int[2];
@@ -82,18 +81,14 @@ public class ThumbnailView extends FrameLayout {
 
     this.image       = findViewById(R.id.thumbnail_image);
     this.playOverlay = findViewById(R.id.play_overlay);
-    this.shade       = findViewById(R.id.shade);
-    this.cornerMask  = findViewById(R.id.corner_mask);
     super.setOnClickListener(new ThumbnailClickDispatcher());
-
-    setCornerRadius(getResources().getDimensionPixelSize(R.dimen.message_corner_radius));
 
     if (attrs != null) {
       TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.ThumbnailView, 0, 0);
-      bounds[MIN_WIDTH]     = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_minWidth, 0);
-      bounds[MAX_WIDTH]     = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxWidth, 0);
-      bounds[MIN_HEIGHT]    = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_minHeight, 0);
-      bounds[MAX_HEIGHT]    = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxHeight, 0);
+      bounds[MIN_WIDTH]  = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_minWidth, 0);
+      bounds[MAX_WIDTH]  = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxWidth, 0);
+      bounds[MIN_HEIGHT] = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_minHeight, 0);
+      bounds[MAX_HEIGHT] = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxHeight, 0);
       typedArray.recycle();
     }
   }
@@ -217,16 +212,13 @@ public class ThumbnailView extends FrameLayout {
     return transferControls.get();
   }
 
-  public void setCornerRadius(int radius) {
-    setCornerRadii(radius, radius, radius, radius);
-  }
+  public void setBounds(int minWidth, int maxWidth, int minHeight, int maxHeight) {
+    bounds[MIN_WIDTH]  = minWidth;
+    bounds[MAX_WIDTH]  = maxWidth;
+    bounds[MIN_HEIGHT] = minHeight;
+    bounds[MAX_HEIGHT] = maxHeight;
 
-  public void setCornerRadii(int topLeft, int topRight, int bottomRight, int bottomLeft) {
-    cornerMask.setRadii(topLeft, topRight, bottomRight, bottomLeft);
-  }
-
-  public void showShade(boolean showShade) {
-    shade.setVisibility(showShade ? VISIBLE : GONE);
+    forceLayout();
   }
 
   public void setImageBackground(@DrawableRes int resId) {
@@ -260,18 +252,18 @@ public class ThumbnailView extends FrameLayout {
       this.playOverlay.setVisibility(View.GONE);
     }
 
-//    if (Util.equals(slide, this.slide)) {
-//      Log.w(TAG, "Not re-loading slide " + slide.asAttachment().getDataUri());
-//      return;
-//    }
+    if (Util.equals(slide, this.slide)) {
+      Log.w(TAG, "Not re-loading slide " + slide.asAttachment().getDataUri());
+      return;
+    }
 
-//    if (this.slide != null && this.slide.getFastPreflightId() != null &&
-//        this.slide.getFastPreflightId().equals(slide.getFastPreflightId()))
-//    {
-//      Log.w(TAG, "Not re-loading slide for fast preflight: " + slide.getFastPreflightId());
-//      this.slide = slide;
-//      return;
-//    }
+    if (this.slide != null && this.slide.getFastPreflightId() != null &&
+        this.slide.getFastPreflightId().equals(slide.getFastPreflightId()))
+    {
+      Log.w(TAG, "Not re-loading slide for fast preflight: " + slide.getFastPreflightId());
+      this.slide = slide;
+      return;
+    }
 
     Log.w(TAG, "loading part with id " + slide.asAttachment().getDataUri()
                + ", progress " + slide.getTransferState() + ", fast preflight id: " +

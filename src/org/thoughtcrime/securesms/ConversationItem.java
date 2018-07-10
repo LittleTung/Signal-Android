@@ -49,6 +49,7 @@ import org.thoughtcrime.securesms.components.AlertView;
 import org.thoughtcrime.securesms.components.AudioView;
 import org.thoughtcrime.securesms.components.AvatarImageView;
 import org.thoughtcrime.securesms.components.ConversationItemFooter;
+import org.thoughtcrime.securesms.components.ConversationItemThumbnail;
 import org.thoughtcrime.securesms.components.DocumentView;
 import org.thoughtcrime.securesms.components.QuoteView;
 import org.thoughtcrime.securesms.components.SharedContactView;
@@ -119,13 +120,13 @@ public class ConversationItem extends LinearLayout
   private AlertView              alertView;
   private ViewGroup              container;
 
-  private @NonNull  Set<MessageRecord>      batchSelected = new HashSet<>();
-  private @NonNull  Recipient               conversationRecipient;
-  private @NonNull  Stub<ThumbnailView>     mediaThumbnailStub;
-  private @NonNull  Stub<AudioView>         audioViewStub;
-  private @NonNull  Stub<DocumentView>      documentViewStub;
-  private @NonNull  Stub<SharedContactView> sharedContactStub;
-  private @Nullable EventListener           eventListener;
+  private @NonNull  Set<MessageRecord>              batchSelected = new HashSet<>();
+  private @NonNull  Recipient                       conversationRecipient;
+  private @NonNull  Stub<ConversationItemThumbnail> mediaThumbnailStub;
+  private @NonNull  Stub<AudioView>                 audioViewStub;
+  private @NonNull  Stub<DocumentView>              documentViewStub;
+  private @NonNull  Stub<SharedContactView>         sharedContactStub;
+  private @Nullable EventListener                   eventListener;
 
   private int defaultBubbleColor;
 
@@ -427,6 +428,8 @@ public class ConversationItem extends LinearLayout
     ViewUtil.setTopMargin(footer, readDimen(R.dimen.message_bubble_footer_top_padding));
     ViewUtil.setBottomMargin(footer, readDimen(R.dimen.message_bubble_bottom_padding));
 
+    if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().showShade(false);
+
     footer.setVisibility(VISIBLE);
 
     if (hasSharedContact(currentMessage)) {
@@ -483,7 +486,6 @@ public class ConversationItem extends LinearLayout
       mediaThumbnailStub.get().setDownloadClickListener(downloadClickListener);
       mediaThumbnailStub.get().setOnLongClickListener(passthroughClickListener);
       mediaThumbnailStub.get().setOnClickListener(passthroughClickListener);
-      mediaThumbnailStub.get().showShade(true);
 
       ViewUtil.updateLayoutParams(bodyText, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -496,6 +498,7 @@ public class ConversationItem extends LinearLayout
       if (TextUtils.isEmpty(currentMessage.getDisplayBody())) {
         ViewUtil.setTopMargin(footer, getImageFooterDisplacement());
         ViewUtil.setBottomMargin(footer, 0);
+        mediaThumbnailStub.get().showShade(true);
         mediaThumbnailStub.get().setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
 
         if (!isGroupThread || !BindableConversationItem.isStartOfMessageCluster(currentMessage, previousMessage, isGroupThread)) {
@@ -674,12 +677,17 @@ public class ConversationItem extends LinearLayout
   }
 
   private void presentFooter(@NonNull MessageRecord messageRecord, @NonNull Locale locale) {
+    footer.setVisibility(GONE);
+    if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
+    if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
+
     if (hasSharedContact(messageRecord)) {
       sharedContactStub.get().getFooter().setVisibility(VISIBLE);
       sharedContactStub.get().getFooter().setMessageRecord(messageRecord, locale);
-      footer.setVisibility(GONE);
+    } else if (hasThumbnail(messageRecord) && TextUtils.isEmpty(messageRecord.getDisplayBody())) {
+      mediaThumbnailStub.get().getFooter().setVisibility(VISIBLE);
+      mediaThumbnailStub.get().getFooter().setMessageRecord(messageRecord, locale);
     } else {
-      if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
       footer.setVisibility(VISIBLE);
       footer.setMessageRecord(messageRecord, locale);
     }
@@ -688,9 +696,11 @@ public class ConversationItem extends LinearLayout
   private ConversationItemFooter getActiveFooter(@NonNull MessageRecord messageRecord) {
     if (hasSharedContact(messageRecord)) {
       return sharedContactStub.get().getFooter();
+    } else if (hasThumbnail(messageRecord) && TextUtils.isEmpty(messageRecord.getDisplayBody())) {
+      return mediaThumbnailStub.get().getFooter();
+    } else {
+      return footer;
     }
-
-    return footer;
   }
 
   private int readDimen(@DimenRes int dimenId) {
