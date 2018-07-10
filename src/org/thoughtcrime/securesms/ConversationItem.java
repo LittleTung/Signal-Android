@@ -386,6 +386,10 @@ public class ConversationItem extends LinearLayout
     return messageRecord.isMms() && ((MmsMessageRecord)messageRecord).getSlideDeck().getThumbnailSlide() != null;
   }
 
+  private boolean hasOnlyThumbnail(MessageRecord messageRecord) {
+    return hasThumbnail(messageRecord) && !hasAudio(messageRecord) && !hasDocument(messageRecord) && !hasSharedContact(messageRecord);
+  }
+
   private boolean hasDocument(MessageRecord messageRecord) {
     return messageRecord.isMms() && ((MmsMessageRecord)messageRecord).getSlideDeck().getDocumentSlide() != null;
   }
@@ -493,10 +497,6 @@ public class ConversationItem extends LinearLayout
       if (TextUtils.isEmpty(currentMessage.getDisplayBody())) {
         mediaThumbnailStub.get().showShade(true);
         mediaThumbnailStub.get().setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
-
-        if (!isGroupThread || !BindableConversationItem.isStartOfMessageCluster(currentMessage, previousMessage, isGroupThread)) {
-          bodyBubble.setBackgroundColor(Color.TRANSPARENT);
-        }
       }
     } else {
       if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().setVisibility(View.GONE);
@@ -519,7 +519,7 @@ public class ConversationItem extends LinearLayout
     int bottomLeft  = defaultRadius;
     int bottomRight = defaultRadius;
 
-    if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread) && BindableConversationItem.isEndOfMessageCluster(current, next, isGroupThread)) {
+    if (BindableConversationItem.isSingularMessage(current, previous, next, isGroupThread)) {
       topLeft     = defaultRadius;
       topRight    = defaultRadius;
       bottomLeft  = defaultRadius;
@@ -552,6 +552,11 @@ public class ConversationItem extends LinearLayout
     }
 
     if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread) && !current.isOutgoing() && isGroupThread) {
+      topLeft  = 0;
+      topRight = 0;
+    }
+
+    if (hasQuote(messageRecord)) {
       topLeft  = 0;
       topRight = 0;
     }
@@ -676,22 +681,15 @@ public class ConversationItem extends LinearLayout
     if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
 
-    if (hasSharedContact(messageRecord)) {
-      sharedContactStub.get().getFooter().setVisibility(VISIBLE);
-      sharedContactStub.get().getFooter().setMessageRecord(messageRecord, locale);
-    } else if (hasThumbnail(messageRecord) && TextUtils.isEmpty(messageRecord.getDisplayBody())) {
-      mediaThumbnailStub.get().getFooter().setVisibility(VISIBLE);
-      mediaThumbnailStub.get().getFooter().setMessageRecord(messageRecord, locale);
-    } else {
-      footer.setVisibility(VISIBLE);
-      footer.setMessageRecord(messageRecord, locale);
-    }
+    ConversationItemFooter activeFooter = getActiveFooter(messageRecord);
+    activeFooter.setVisibility(VISIBLE);
+    activeFooter.setMessageRecord(messageRecord, locale);
   }
 
   private ConversationItemFooter getActiveFooter(@NonNull MessageRecord messageRecord) {
     if (hasSharedContact(messageRecord)) {
       return sharedContactStub.get().getFooter();
-    } else if (hasThumbnail(messageRecord) && TextUtils.isEmpty(messageRecord.getDisplayBody())) {
+    } else if (hasOnlyThumbnail(messageRecord) && TextUtils.isEmpty(messageRecord.getDisplayBody())) {
       return mediaThumbnailStub.get().getFooter();
     } else {
       return footer;

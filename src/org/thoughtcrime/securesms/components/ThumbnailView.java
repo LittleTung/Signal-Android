@@ -2,14 +2,6 @@ package org.thoughtcrime.securesms.components;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
@@ -26,6 +18,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 
 import org.thoughtcrime.securesms.R;
@@ -53,9 +46,9 @@ public class ThumbnailView extends FrameLayout {
   private static final int    MIN_HEIGHT = 2;
   private static final int    MAX_HEIGHT = 3;
 
-  private ImageView         image;
-  private View              playOverlay;
-  private OnClickListener   parentClickListener;
+  private ImageView       image;
+  private View            playOverlay;
+  private OnClickListener parentClickListener;
 
   private final int[] dimens        = new int[2];
   private final int[] bounds        = new int[4];
@@ -65,6 +58,8 @@ public class ThumbnailView extends FrameLayout {
   private SlideClickListener            thumbnailClickListener = null;
   private SlideClickListener            downloadClickListener  = null;
   private Slide                         slide                  = null;
+
+  private int radius;
 
   public ThumbnailView(Context context) {
     this(context, null);
@@ -91,6 +86,8 @@ public class ThumbnailView extends FrameLayout {
       bounds[MAX_HEIGHT] = typedArray.getDimensionPixelSize(R.styleable.ThumbnailView_maxHeight, 0);
       typedArray.recycle();
     }
+
+    radius = getResources().getDimensionPixelOffset(R.dimen.message_corner_collapse_radius);
   }
 
   @Override
@@ -284,9 +281,9 @@ public class ThumbnailView extends FrameLayout {
   public void setImageResource(@NonNull GlideRequests glideRequests, @NonNull Uri uri) {
     if (transferControls.isPresent()) getTransferControls().setVisibility(View.GONE);
     glideRequests.load(new DecryptableUri(uri))
-                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                 .diskCacheStrategy(DiskCacheStrategy.NONE)
+                 .transforms(new CenterCrop(), new RoundedCorners(radius))
                  .transition(withCrossFade())
-                 .centerCrop()
                  .into(image);
   }
 
@@ -335,7 +332,7 @@ public class ThumbnailView extends FrameLayout {
       size[HEIGHT] = getDefaultHeight();
     }
     return request.override(size[WIDTH], size[HEIGHT])
-                  .transforms(fitting);
+                  .transforms(fitting, new RoundedCorners(radius));
   }
 
   private int getDefaultWidth() {
