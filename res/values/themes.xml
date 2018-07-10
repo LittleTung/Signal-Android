@@ -190,6 +190,7 @@
         <item name="conversation_item_received_text_primary_color">@color/white</item>
         <item name="conversation_item_received_text_secondary_color">#BFffffff</item>
         <item name="conversation_item_header_background">@drawable/conversation_item_header_background</item>
+        <item name="conversation_item_update_text_color">@color/core_light_60</item>
         <item name="conversation_item_last_seen_background">@drawable/last_seen_background</item>
         <item name="conversation_item_last_seen_text_background">@drawable/last_seen_divider_text_background_light</item>
 
@@ -276,6 +277,7 @@
         <item name="conversation_item_received_text_secondary_color">#BFffffff</item>
         <item name="conversation_item_sent_indicator_text_background">@drawable/conversation_item_sent_indicator_text_shape_dark</item>
         <item name="conversation_item_header_background">@drawable/conversation_item_header_background_dark</item>
+        <item name="conversation_item_update_text_color">@color/core_light_60</item>
         <item name="conversation_item_last_seen_background">#66333333</item>
         <item name="conversation_item_last_seen_text_background">@drawable/last_seen_divider_text_background_dark</item>
 
