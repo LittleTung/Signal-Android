@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -53,6 +54,7 @@ public class ConversationItemThumbnail extends FrameLayout {
     this.footer     = findViewById(R.id.conversation_thumbnail_footer);
 
     setCornerRadius(getResources().getDimensionPixelSize(R.dimen.message_corner_radius));
+    setTouchDelegate(thumbnail.getTouchDelegate());
 
     if (attrs != null) {
       TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.ConversationItemThumbnail, 0, 0);
@@ -75,25 +77,18 @@ public class ConversationItemThumbnail extends FrameLayout {
   }
 
   @Override
-  public void setOnClickListener(OnClickListener listener) {
-    thumbnail.setOnClickListener(listener);
-  }
-
-  @Override
-  public boolean dispatchTouchEvent(MotionEvent ev) {
-    return thumbnail.dispatchTouchEvent(ev);
-  }
-
-  @Override
   public void setFocusable(boolean focusable) {
-    super.setFocusable(focusable);
     thumbnail.setFocusable(focusable);
   }
 
   @Override
   public void setClickable(boolean clickable) {
-    super.setClickable(clickable);
     thumbnail.setClickable(clickable);
+  }
+
+  @Override
+  public void setOnLongClickListener(@Nullable OnLongClickListener l) {
+    thumbnail.setOnLongClickListener(l);
   }
 
   public void showShade(boolean show) {
