@@ -225,33 +225,6 @@ public class ConversationItem extends LinearLayout
   }
 
   @Override
-  public void onLayout(boolean changed, int left, int top, int right, int bottom) {
-    super.onLayout(changed, left, top, right, bottom);
-
-    if (groupSenderHolder != null && groupSenderHolder.getVisibility() == View.VISIBLE) {
-      View content = (View) groupSenderHolder.getParent();
-
-       groupSenderHolder.layout(content.getPaddingLeft() + ViewUtil.getLeftMargin(groupSenderHolder),
-                                content.getPaddingTop(),
-                                content.getWidth() - content.getPaddingRight() - ViewUtil.getRightMargin(groupSenderHolder),
-                                content.getPaddingTop() + groupSenderHolder.getMeasuredHeight());
-
-
-      if (ViewCompat.getLayoutDirection(groupSenderProfileName) == ViewCompat.LAYOUT_DIRECTION_RTL) {
-        groupSenderProfileName.layout(groupSenderHolder.getPaddingLeft(),
-                                      groupSenderHolder.getPaddingTop(),
-                                      groupSenderHolder.getPaddingLeft() + groupSenderProfileName.getWidth(),
-                                      groupSenderHolder.getPaddingTop() + groupSenderProfileName.getHeight());
-      } else {
-        groupSenderProfileName.layout(groupSenderHolder.getWidth() - groupSenderHolder.getPaddingRight() - groupSenderProfileName.getWidth(),
-                                      groupSenderHolder.getPaddingTop(),
-                                      groupSenderHolder.getWidth() - groupSenderProfileName.getPaddingRight(),
-                                      groupSenderHolder.getPaddingTop() + groupSenderProfileName.getHeight());
-      }
-    }
-  }
-
-  @Override
   protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
@@ -758,7 +731,7 @@ public class ConversationItem extends LinearLayout
   private void presentGroupMessageStatus(MessageRecord messageRecord, Recipient recipient) {
     this.groupSender.setText(recipient.toShortString());
 
-    if (recipient.getName() == null && !TextUtils.isEmpty(recipient.getProfileName())) {
+    if (recipient.getName() == null && !TextUtils.isEmpty(recipient.getProfileName()) && !messageRecord.isOutgoing()) {
       this.groupSenderProfileName.setText("~" + recipient.getProfileName());
       this.groupSenderProfileName.setVisibility(View.VISIBLE);
     } else {
