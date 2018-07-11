@@ -12,16 +12,16 @@ import java.util.Map;
 import static org.thoughtcrime.securesms.util.ThemeUtil.isDarkTheme;
 
 public enum MaterialColor {
-  RED        (R.color.conversation_red,         R.color.red_900,         "red"),
-  PINK       (R.color.conversation_pink,        R.color.pink_800,        "pink"),
-  PURPLE     (R.color.conversation_purple,      R.color.purple_700,      "purple"),
-  INDIGO     (R.color.conversation_indigo,      R.color.indigo_800,      "indigo"),
-  BLUE       (R.color.conversation_blue,        R.color.blue_900,        "blue"),
-  CYAN       (R.color.conversation_cyan,        R.color.cyan_900,        "cyan"),
-  TEAL       (R.color.conversation_teal,        R.color.teal_800,        "teal"),
-  GREEN      (R.color.conversation_green,       R.color.green_900,       "green"),
-  ORANGE     (R.color.conversation_orange,      R.color.deep_orange_900, "orange"),
-  GREY       (R.color.conversation_grey,        R.color.grey_700,        "grey");
+  RED        (R.color.conversation_red,    R.color.conversation_red_shade,    "red"),
+  PINK       (R.color.conversation_pink,   R.color.conversation_pink_shade,   "pink"),
+  PURPLE     (R.color.conversation_purple, R.color.conversation_purple_shade, "purple"),
+  INDIGO     (R.color.conversation_indigo, R.color.conversation_indigo_shade, "indigo"),
+  BLUE       (R.color.conversation_blue,   R.color.conversation_blue_shade,   "blue"),
+  CYAN       (R.color.conversation_cyan,   R.color.conversation_cyan_shade,   "cyan"),
+  TEAL       (R.color.conversation_teal,   R.color.conversation_teal_shade,   "teal"),
+  GREEN      (R.color.conversation_green,  R.color.conversation_green_shade,  "green"),
+  ORANGE     (R.color.conversation_orange, R.color.conversation_orange_shade, "orange"),
+  GREY       (R.color.conversation_grey,   R.color.conversation_grey_shade,   "grey");
 
   private static Map<String, MaterialColor> colorMap = new HashMap<String, MaterialColor>() {{
     put("red", RED);
