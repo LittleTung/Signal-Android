@@ -216,7 +216,7 @@ public class ConversationItem extends LinearLayout
     setMessageMargins(messageRecord, groupThread);
     setAuthorTitleVisibility(messageRecord, previousMessageRecord, groupThread);
     setAuthorAvatarVisibility(messageRecord, nextMessageRecord, groupThread);
-    presentFooter(messageRecord, previousMessageRecord, locale);
+    presentFooter(messageRecord, previousMessageRecord, locale, groupThread);
   }
 
   @Override
@@ -675,7 +675,7 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void presentFooter(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Locale locale) {
+  private void presentFooter(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Locale locale, boolean isGroupThread) {
     ViewUtil.updateLayoutParams(footer, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     ViewUtil.setPaddingBottom(bodyBubble, 0);
 
@@ -684,7 +684,7 @@ public class ConversationItem extends LinearLayout
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
 
     boolean differentMinutes = previous.isPresent() && !DateUtils.isSameMinute(previous.get().getTimestamp(), current.getTimestamp());
-    if (current.isOutgoing() || current.getExpiresIn() > 0 || !current.isSecure() || differentMinutes) {
+    if (current.isOutgoing() || current.getExpiresIn() > 0 || !current.isSecure() || differentMinutes || isStartOfMessageCluster(current, previous, isGroupThread)) {
       ConversationItemFooter activeFooter = getActiveFooter(current);
       activeFooter.setVisibility(VISIBLE);
       activeFooter.setMessageRecord(current, locale);
