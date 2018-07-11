@@ -5,8 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="20dp"
-    android:paddingBottom="19dp">
+    android:paddingTop="24dp"
+    android:paddingBottom="20dp">
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="3dp"
+        android:background="?attr/conversation_item_last_seen_line_color" />
 
     <TextView
         android:id="@+id/text"
