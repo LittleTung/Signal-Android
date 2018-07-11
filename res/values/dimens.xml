@@ -86,4 +86,6 @@
     <dimen name="text_preview_lineSpacingExtra">6sp</dimen>
     <dimen name="text_caption_lineSpacingExtra">4sp</dimen>
 
+    <dimen name="alertview_small_icon_size">14dp</dimen>
+
 </resources>

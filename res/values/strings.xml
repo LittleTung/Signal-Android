@@ -110,7 +110,7 @@
     <string name="ContactShareEditActivity_invalid_contact">Selected contact was invalid</string>
 
     <!-- ConversationItem -->
-    <string name="ConversationItem_error_not_delivered">Not delivered</string>
+    <string name="ConversationItem_error_not_delivered">Send failed</string>
     <string name="ConversationItem_received_key_exchange_message_tap_to_process">Received key exchange message, tap to process.</string>
     <string name="ConversationItem_group_action_left">%1$s has left the group.</string>
     <string name="ConversationItem_click_for_details">Tap for details</string>

@@ -23,21 +23,12 @@
         android:clipToPadding="false"
         android:clipChildren="false">
 
-        <org.thoughtcrime.securesms.components.AlertView
-            android:id="@+id/indicators_parent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="left|center_vertical"
-            android:layout_marginLeft="6dp"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"/>
-
         <LinearLayout
             android:id="@+id/body_bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_toLeftOf="@+id/indicators_parent"
+            android:layout_toStartOf="@+id/indicators_parent"
             android:layout_marginLeft="@dimen/message_bubble_edge_margin"
             android:layout_marginStart="@dimen/message_bubble_edge_margin"
             android:orientation="vertical"
@@ -130,6 +121,18 @@
                 app:footer_color="?conversation_item_sent_text_secondary_color"/>
 
         </LinearLayout>
+
+        <org.thoughtcrime.securesms.components.AlertView
+            android:id="@+id/indicators_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="4dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true" />
 
         <TextView
             android:id="@+id/indicator_text"
