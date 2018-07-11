@@ -52,15 +52,45 @@
                     android:ellipsize="end"
                     tools:text="Peter Parker" />
 
+                <LinearLayout
+                    android:id="@+id/quote_attachment_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:layout_width="27dp"
+                        android:layout_height="35dp"
+                        android:layout_marginRight="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:paddingLeft="-4dp"
+                        android:paddingStart="-4dp"
+                        android:src="@drawable/ic_document" />
+
+                    <TextView
+                        android:id="@+id/quote_attachment_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Signal.Text.Body"
+                        android:textColor="@color/core_light_90"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        tools:text="The-Amazing-Spider-Man.cba" />
+
+                </LinearLayout>
+
                 <TextView
-                    android:id="@+id/media_name"
+                    android:id="@+id/media_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="8dp"
                     style="@style/Signal.Text.Caption"
-                    android:textColor="@color/core_black"
+                    android:textColor="@color/core_light_90"
                     android:paddingTop="4dp"
-                    android:textSize="12sp"
                     android:textStyle="italic"
                     android:visibility="gone"
                     tools:text="Photo"
@@ -84,7 +114,7 @@
                 android:layout_height="match_parent">
                 
                 <ImageView
-                    android:id="@+id/quote_attachment"
+                    android:id="@+id/quote_thumbnail"
                     android:layout_width="60dp"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
@@ -112,30 +142,6 @@
                         app:srcCompat="@drawable/triangle_right" />
 
                 </FrameLayout>
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/quote_attachment_icon_container"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/quote_attachment_icon_background"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="8dp"
-                    android:src="@drawable/circle_tintable" />
-
-                <ImageView
-                    android:id="@+id/quote_attachment_icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="15dp"
-                    tools:src="@drawable/ic_insert_drive_file_white_24dp"
-                    tools:tint="@color/purple_400" />
 
             </FrameLayout>
 
