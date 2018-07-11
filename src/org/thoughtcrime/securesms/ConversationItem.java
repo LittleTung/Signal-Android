@@ -74,6 +74,7 @@ import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.SlideClickListener;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientModifiedListener;
+import org.thoughtcrime.securesms.util.DateUtils;
 import org.thoughtcrime.securesms.util.DynamicTheme;
 import org.thoughtcrime.securesms.util.LongClickCopySpan;
 import org.thoughtcrime.securesms.util.LongClickMovementMethod;
@@ -211,11 +212,11 @@ public class ConversationItem extends LinearLayout
     presentGroupMessageStatus(messageRecord, recipient);
     setMinimumWidth();
     presentQuote(messageRecord);
-    ViewUtil.setPaddingBottom(this, BindableConversationItem.getMessageSpacing(context, messageRecord, nextMessageRecord));
+    ViewUtil.setPaddingBottom(this, getMessageSpacing(context, messageRecord, nextMessageRecord));
     setMessageMargins(messageRecord, groupThread);
     setAuthorTitleVisibility(messageRecord, previousMessageRecord, groupThread);
     setAuthorAvatarVisibility(messageRecord, nextMessageRecord, groupThread);
-    presentFooter(messageRecord, locale);
+    presentFooter(messageRecord, previousMessageRecord, locale);
   }
 
   @Override
@@ -496,7 +497,7 @@ public class ConversationItem extends LinearLayout
 
       if (TextUtils.isEmpty(currentMessage.getDisplayBody())) {
         mediaThumbnailStub.get().showShade(true);
-        mediaThumbnailStub.get().setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
+        mediaThumbnailStub.get().setBackgroundResource(getCornerBackgroundRes(currentMessage, previousMessage, nextMessage, isGroupThread));
       }
     } else {
       if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().setVisibility(View.GONE);
@@ -519,18 +520,18 @@ public class ConversationItem extends LinearLayout
     int bottomLeft  = defaultRadius;
     int bottomRight = defaultRadius;
 
-    if (BindableConversationItem.isSingularMessage(current, previous, next, isGroupThread)) {
+    if (isSingularMessage(current, previous, next, isGroupThread)) {
       topLeft     = defaultRadius;
       topRight    = defaultRadius;
       bottomLeft  = defaultRadius;
       bottomRight = defaultRadius;
-    } else if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread)) {
+    } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
       if (current.isOutgoing()) {
         bottomRight = collapseRadius;
       } else {
         bottomLeft = collapseRadius;
       }
-    } else if (BindableConversationItem.isEndOfMessageCluster(current, next, isGroupThread)) {
+    } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
       if (current.isOutgoing()) {
         topRight = collapseRadius;
       } else {
@@ -551,7 +552,7 @@ public class ConversationItem extends LinearLayout
       bottomRight = 0;
     }
 
-    if (BindableConversationItem.isStartOfMessageCluster(current, previous, isGroupThread) && !current.isOutgoing() && isGroupThread) {
+    if (isStartOfMessageCluster(current, previous, isGroupThread) && !current.isOutgoing() && isGroupThread) {
       topLeft  = 0;
       topRight = 0;
     }
@@ -646,7 +647,7 @@ public class ConversationItem extends LinearLayout
                                         @NonNull Optional<MessageRecord> next,
                                         boolean                 isGroupThread)
   {
-    bodyBubble.setBackgroundResource(BindableConversationItem.getCornerBackgroundRes(current, previous, next, isGroupThread));
+    bodyBubble.setBackgroundResource(getCornerBackgroundRes(current, previous, next, isGroupThread));
   }
 
   private void setAuthorTitleVisibility(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
@@ -674,16 +675,22 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void presentFooter(@NonNull MessageRecord messageRecord, @NonNull Locale locale) {
+  private void presentFooter(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Locale locale) {
     ViewUtil.updateLayoutParams(footer, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+    ViewUtil.setPaddingBottom(bodyBubble, 0);
 
     footer.setVisibility(GONE);
     if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
 
-    ConversationItemFooter activeFooter = getActiveFooter(messageRecord);
-    activeFooter.setVisibility(VISIBLE);
-    activeFooter.setMessageRecord(messageRecord, locale);
+    boolean differentMinutes = previous.isPresent() && !DateUtils.isSameMinute(previous.get().getTimestamp(), current.getTimestamp());
+    if (current.isOutgoing() || current.getExpiresIn() > 0 || !current.isSecure() || differentMinutes) {
+      ConversationItemFooter activeFooter = getActiveFooter(current);
+      activeFooter.setVisibility(VISIBLE);
+      activeFooter.setMessageRecord(current, locale);
+    } else if (!TextUtils.isEmpty(messageRecord.getDisplayBody())) {
+      ViewUtil.setPaddingBottom(bodyBubble, readDimen(R.dimen.message_bubble_collapsed_footer_padding));
+    }
   }
 
   private ConversationItemFooter getActiveFooter(@NonNull MessageRecord messageRecord) {
@@ -742,6 +749,62 @@ public class ConversationItem extends LinearLayout
       this.groupSenderProfileName.setText(null);
       this.groupSenderProfileName.setVisibility(View.GONE);
     }
+  }
+
+  static int getCornerBackgroundRes(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    if (isSingularMessage(current, previous, next, isGroupThread)) {
+      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_alone
+          : R.drawable.message_bubble_background_received_alone;
+    } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
+      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_start
+          : R.drawable.message_bubble_background_received_start;
+    } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
+      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_end
+          : R.drawable.message_bubble_background_received_end;
+    } else {
+      return current.isOutgoing() ? R.drawable.message_bubble_background_sent_middle
+          : R.drawable.message_bubble_background_received_middle;
+    }
+  }
+
+  static boolean isStartOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
+    if (isGroupThread) {
+      return !previous.isPresent() || previous.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), previous.get().getTimestamp()) ||
+          !current.getRecipient().getAddress().equals(previous.get().getRecipient().getAddress());
+    } else {
+      return !previous.isPresent() || previous.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), previous.get().getTimestamp()) ||
+          current.isOutgoing() != previous.get().isOutgoing();
+    }
+  }
+
+  static boolean isEndOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    if (isGroupThread) {
+      return !next.isPresent() || next.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), next.get().getTimestamp()) ||
+          !current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
+    } else {
+      return !next.isPresent() || next.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), next.get().getTimestamp()) ||
+          current.isOutgoing() != next.get().isOutgoing();
+    }
+  }
+
+  static boolean isSingularMessage(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    return isStartOfMessageCluster(current, previous, isGroupThread) && isEndOfMessageCluster(current, next, isGroupThread);
+  }
+
+  static int getMessageSpacing(@NonNull Context context, @NonNull MessageRecord current, @NonNull Optional<MessageRecord> next) {
+    if (next.isPresent()) {
+      boolean recipientsMatch = current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
+      boolean outgoingMatch   = current.isOutgoing() == next.get().isOutgoing();
+
+      if (!recipientsMatch || !outgoingMatch) {
+        return readDimen(context, R.dimen.conversation_vertical_message_spacing_default);
+      }
+    }
+    return readDimen(context, R.dimen.conversation_vertical_message_spacing_collapse);
+  }
+
+  static int readDimen(@NonNull Context context, @DimenRes int dimenId) {
+    return context.getResources().getDimensionPixelOffset(dimenId);
   }
 
   /// Event handlers

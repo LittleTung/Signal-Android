@@ -35,6 +35,7 @@ public class DateUtils extends android.text.format.DateUtils {
 
   @SuppressWarnings("unused")
   private static final String TAG = DateUtils.class.getSimpleName();
+  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
   private static boolean isWithin(final long millis, final long span, final TimeUnit unit) {
     return System.currentTimeMillis() - millis <= unit.toMillis(span);
@@ -132,10 +133,14 @@ public class DateUtils extends android.text.format.DateUtils {
   }
 
   public static boolean isSameDay(long t1, long t2) {
-    long d1 = t1 / TimeUnit.DAYS.toMillis(1);
-    long d2 = t2 / TimeUnit.DAYS.toMillis(1);
+    return DATE_FORMAT.format(new Date(t1)).equals(DATE_FORMAT.format(new Date(t2)));
+  }
 
-    return d1 == d2;
+  public static boolean isSameMinute(long t1, long t2) {
+    long m1 = t1 / TimeUnit.MINUTES.toMillis(1);
+    long m2 = t2 / TimeUnit.MINUTES.toMillis(1);
+
+    return m1 == m2;
   }
 
   private static String getLocalizedPattern(String template, Locale locale) {
