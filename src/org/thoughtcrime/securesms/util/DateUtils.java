@@ -136,11 +136,8 @@ public class DateUtils extends android.text.format.DateUtils {
     return DATE_FORMAT.format(new Date(t1)).equals(DATE_FORMAT.format(new Date(t2)));
   }
 
-  public static boolean isSameMinute(long t1, long t2) {
-    long m1 = t1 / TimeUnit.MINUTES.toMillis(1);
-    long m2 = t2 / TimeUnit.MINUTES.toMillis(1);
-
-    return m1 == m2;
+  public static boolean isSameBriefRelativeTimestamp(@NonNull Context context, @NonNull Locale locale, long t1, long t2) {
+    return getBriefRelativeTimeSpanString(context, locale, t1).equals(getBriefRelativeTimeSpanString(context, locale, t2));
   }
 
   private static String getLocalizedPattern(String template, Locale locale) {

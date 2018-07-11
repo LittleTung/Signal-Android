@@ -416,6 +416,8 @@ public class ConversationItem extends LinearLayout
       sharedContactStub.get().setOnClickListener(sharedContactClickListener);
       sharedContactStub.get().setOnLongClickListener(passthroughClickListener);
 
+      setSharedContactCorners(currentMessage, previousMessage, nextMessage, isGroupThread);
+
       footer.setVisibility(GONE);
     } else if (hasAudio(currentMessage)) {
       audioViewStub.get().setVisibility(View.VISIBLE);
@@ -536,6 +538,18 @@ public class ConversationItem extends LinearLayout
     }
 
     mediaThumbnailStub.get().setCornerRadii(topLeft, topRight, bottomRight, bottomLeft);
+  }
+
+  private void setSharedContactCorners(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    if (isSingularMessage(current, previous, next, isGroupThread) || isEndOfMessageCluster(current, next, isGroupThread)) {
+      sharedContactStub.get().setSingularStyle();
+    } else {
+      if (current.isOutgoing()) {
+        sharedContactStub.get().setClusteredOutgoingStyle();
+      } else {
+        sharedContactStub.get().setClusteredIncomingStyle();
+      }
+    }
   }
 
   private void presentContactPhoto(@NonNull Recipient recipient) {
@@ -672,7 +686,7 @@ public class ConversationItem extends LinearLayout
     if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
 
-    boolean differentMinutes = previous.isPresent() && !DateUtils.isSameMinute(previous.get().getTimestamp(), current.getTimestamp());
+    boolean differentMinutes = previous.isPresent() && !DateUtils.isSameBriefRelativeTimestamp(context, locale, previous.get().getTimestamp(), current.getTimestamp());
     if (current.isOutgoing() || current.getExpiresIn() > 0 || !current.isSecure() || differentMinutes || isStartOfMessageCluster(current, previous, isGroupThread)) {
       ConversationItemFooter activeFooter = getActiveFooter(current);
       activeFooter.setVisibility(VISIBLE);
