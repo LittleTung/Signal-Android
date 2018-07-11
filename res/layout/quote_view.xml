@@ -11,11 +11,11 @@
     android:layout_margin="3dp"
     tools:visibility="visible">
 
-    <FrameLayout
+    <org.thoughtcrime.securesms.components.CornerMaskingView
         android:id="@+id/quote_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/quote_background">
+        android:background="#c0ffffff">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -153,6 +153,6 @@
             android:src="@drawable/ic_close_white_18dp"
             android:tint="@color/gray70" />
 
-    </FrameLayout>
+    </org.thoughtcrime.securesms.components.CornerMaskingView>
 
 </merge>

@@ -374,7 +374,6 @@ public class ConversationAdapter <V extends View & BindableConversationItem>
     return messageRecord.isMms() && ((MmsMessageRecord)messageRecord).getSlideDeck().getThumbnailSlide() != null;
   }
 
-
   @Override
   public long getHeaderId(int position) {
     if (!isActiveCursor())          return -1;

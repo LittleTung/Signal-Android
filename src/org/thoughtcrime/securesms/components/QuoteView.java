@@ -3,11 +3,9 @@ package org.thoughtcrime.securesms.components;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Path;
 import android.graphics.PorterDuff;
-import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -26,14 +24,10 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.attachments.Attachment;
-import org.thoughtcrime.securesms.mms.AudioSlide;
 import org.thoughtcrime.securesms.mms.DecryptableStreamUriLoader.DecryptableUri;
-import org.thoughtcrime.securesms.mms.DocumentSlide;
 import org.thoughtcrime.securesms.mms.GlideRequests;
-import org.thoughtcrime.securesms.mms.ImageSlide;
 import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.SlideDeck;
-import org.thoughtcrime.securesms.mms.VideoSlide;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.recipients.RecipientModifiedListener;
 import org.thoughtcrime.securesms.util.ThemeUtil;
@@ -49,16 +43,16 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
   private static final int MESSAGE_TYPE_OUTGOING = 1;
   private static final int MESSAGE_TYPE_INCOMING = 2;
 
-  private View      rootView;
-  private TextView  authorView;
-  private TextView  bodyView;
-  private ImageView quoteBarView;
-  private ImageView attachmentView;
-  private View      attachmentVideoOverlayView;
-  private ViewGroup attachmentIconContainerView;
-  private ImageView attachmentIconView;
-  private ImageView attachmentIconBackgroundView;
-  private ImageView dismissView;
+  private CornerMaskingView rootView;
+  private TextView          authorView;
+  private TextView          bodyView;
+  private ImageView         quoteBarView;
+  private ImageView         attachmentView;
+  private View              attachmentVideoOverlayView;
+  private ViewGroup         attachmentIconContainerView;
+  private ImageView         attachmentIconView;
+  private ImageView         attachmentIconBackgroundView;
+  private ImageView         dismissView;
 
   private long      id;
   private Recipient author;
@@ -66,12 +60,9 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
   private TextView  mediaDescriptionText;
   private SlideDeck attachments;
   private int       messageType;
-  private int       roundedCornerRadiusTopPx;
-  private int       roundedCornerRadiusBottomPx;
-  private float[]   cornerRadii;
+  private int       largeCornerRadius;
+  private int       smallCornerRadius;
 
-  private final Path  clipPath = new Path();
-  private final RectF drawRect = new RectF();
 
   public QuoteView(Context context) {
     super(context);
@@ -108,12 +99,10 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     this.attachmentIconBackgroundView = findViewById(R.id.quote_attachment_icon_background);
     this.dismissView                  = findViewById(R.id.quote_dismiss);
     this.mediaDescriptionText         = findViewById(R.id.media_name);
-    this.roundedCornerRadiusTopPx     = getResources().getDimensionPixelSize(R.dimen.quote_corner_radius_top);
-    this.roundedCornerRadiusBottomPx  = getResources().getDimensionPixelSize(R.dimen.quote_corner_radius_bottom);
-    this.cornerRadii                  = new float[] { roundedCornerRadiusTopPx, roundedCornerRadiusTopPx,
-                                                      roundedCornerRadiusTopPx, roundedCornerRadiusTopPx,
-                                                      roundedCornerRadiusBottomPx, roundedCornerRadiusBottomPx,
-                                                      roundedCornerRadiusBottomPx, roundedCornerRadiusBottomPx };
+    this.largeCornerRadius            = getResources().getDimensionPixelSize(R.dimen.quote_corner_radius_large);
+    this.smallCornerRadius            = getResources().getDimensionPixelSize(R.dimen.quote_corner_radius_bottom);
+
+    rootView.setRadii(largeCornerRadius, largeCornerRadius, smallCornerRadius, smallCornerRadius);
 
     if (attrs != null) {
       TypedArray typedArray  = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.QuoteView, 0, 0);
@@ -131,20 +120,6 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     }
   }
 
-  @Override
-  protected void onDraw(Canvas canvas) {
-    super.onDraw(canvas);
-
-    drawRect.left   = 0;
-    drawRect.top    = 0;
-    drawRect.right  = getWidth();
-    drawRect.bottom = getHeight();
-
-    clipPath.reset();
-    clipPath.addRoundRect(drawRect, cornerRadii, Path.Direction.CW);
-    canvas.clipPath(clipPath);
-  }
-
   public void setQuote(GlideRequests glideRequests, long id, @NonNull Recipient author, @Nullable String body, @NonNull SlideDeck attachments) {
     if (this.author != null) this.author.removeListener(this);
 
@@ -157,6 +132,11 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     setQuoteAuthor(author);
     setQuoteText(body, attachments);
     setQuoteAttachment(glideRequests, attachments, author);
+  }
+
+  public void setTopCornerSizes(boolean topLeftLarge, boolean topRightLarge) {
+    rootView.setTopLeftRadius(topLeftLarge ? largeCornerRadius : smallCornerRadius);
+    rootView.setTopRightRadius(topRightLarge ? largeCornerRadius : smallCornerRadius);
   }
 
   public void dismiss() {
@@ -188,10 +168,7 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
 
     // We use the raw color resource because Android 4.x was struggling with tints here
     quoteBarView.setImageResource(author.getColor().toQuoteBarColorResource(getContext(), outgoing));
-
-    GradientDrawable background = (GradientDrawable) rootView.getBackground();
-    background.setColor(author.getColor().toQuoteBackgroundColor(getContext(), outgoing));
-
+    rootView.setBackgroundColor(author.getColor().toQuoteBackgroundColor(getContext(), outgoing));
   }
 
   private void setQuoteText(@Nullable String body, @NonNull SlideDeck attachments) {

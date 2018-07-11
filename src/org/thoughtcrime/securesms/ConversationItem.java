@@ -211,7 +211,7 @@ public class ConversationItem extends LinearLayout
     presentContactPhoto(recipient);
     presentGroupMessageStatus(messageRecord, recipient);
     setMinimumWidth();
-    presentQuote(messageRecord);
+    presentQuote(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
     ViewUtil.setPaddingBottom(this, getMessageSpacing(context, messageRecord, nextMessageRecord));
     setMessageMargins(messageRecord, groupThread);
     setAuthorTitleVisibility(messageRecord, previousMessageRecord, groupThread);
@@ -604,9 +604,9 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void presentQuote(@NonNull MessageRecord messageRecord) {
-    if (messageRecord.isMms() && !messageRecord.isMmsNotification() && ((MediaMmsMessageRecord)messageRecord).getQuote() != null) {
-      Quote quote = ((MediaMmsMessageRecord)messageRecord).getQuote();
+  private void presentQuote(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    if (current.isMms() && !current.isMmsNotification() && ((MediaMmsMessageRecord)current).getQuote() != null) {
+      Quote quote = ((MediaMmsMessageRecord)current).getQuote();
       assert quote != null;
       quoteView.setQuote(glideRequests, quote.getId(), Recipient.from(context, quote.getAuthor(), true), quote.getText(), quote.getAttachment());
       quoteView.setVisibility(View.VISIBLE);
@@ -614,13 +614,29 @@ public class ConversationItem extends LinearLayout
 
       quoteView.setOnClickListener(view -> {
         if (eventListener != null && batchSelected.isEmpty()) {
-          eventListener.onQuoteClicked((MmsMessageRecord) messageRecord);
+          eventListener.onQuoteClicked((MmsMessageRecord) current);
         } else {
           passthroughClickListener.onClick(view);
         }
       });
       quoteView.setOnLongClickListener(passthroughClickListener);
       ViewUtil.setPaddingTop(bodyBubble, 0);
+
+      if (isStartOfMessageCluster(current, previous, isGroupThread)) {
+        if (current.isOutgoing()) {
+          quoteView.setTopCornerSizes(true, true);
+        } else if (isGroupThread) {
+          quoteView.setTopCornerSizes(false, false);
+        } else {
+          quoteView.setTopCornerSizes(true, true);
+        }
+      } else if (!isSingularMessage(current, previous, next, isGroupThread)) {
+        if (current.isOutgoing()) {
+          quoteView.setTopCornerSizes(true, false);
+        } else {
+          quoteView.setTopCornerSizes(false, true);
+        }
+      }
     } else {
       quoteView.dismiss();
     }

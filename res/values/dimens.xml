@@ -44,7 +44,7 @@
     <dimen name="conversation_vertical_message_spacing_collapse">2dp</dimen>
 
     <dimen name="quote_corner_radius">3dp</dimen>
-    <dimen name="quote_corner_radius_top">10dp</dimen>
+    <dimen name="quote_corner_radius_large">10dp</dimen>
     <dimen name="quote_corner_radius_bottom">4dp</dimen>
     <dimen name="quote_outline_width">1dp</dimen>
 

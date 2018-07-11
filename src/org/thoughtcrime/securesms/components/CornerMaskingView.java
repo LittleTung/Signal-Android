@@ -63,21 +63,31 @@ public class CornerMaskingView extends FrameLayout {
     setRadii(radius, radius, radius, radius);
   }
 
-  public void setRadii(@NonNull CornerSpec spec) {
-    setRadii(spec.getTopLeft(getContext()), spec.getTopRight(getContext()), spec.getBottomRight(getContext()), spec.getBottomLeft(getContext()));
-  }
-
   public void setRadii(int topLeft, int topRight, int bottomRight, int bottomLeft) {
     radii[0] = radii[1] = topLeft;
     radii[2] = radii[3] = topRight;
     radii[4] = radii[5] = bottomRight;
     radii[6] = radii[7] = bottomLeft;
+    invalidate();
   }
 
-  public interface CornerSpec {
-    int getTopLeft(@NonNull Context context);
-    int getTopRight(@NonNull Context context);
-    int getBottomRight(@NonNull Context context);
-    int getBottomLeft(@NonNull Context context);
+  public void setTopLeftRadius(int radius) {
+    radii[0] = radii[1] = radius;
+    invalidate();
+  }
+
+  public void setTopRightRadius(int radius) {
+    radii[2] = radii[3] = radius;
+    invalidate();
+  }
+
+  public void setBottomRightRadius(int radius) {
+    radii[4] = radii[5] = radius;
+    invalidate();
+  }
+
+  public void setBottomLeftRadius(int radius) {
+    radii[6] = radii[7] = radius;
+    invalidate();
   }
 }
