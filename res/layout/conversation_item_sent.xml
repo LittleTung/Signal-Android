@@ -29,6 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_toLeftOf="@+id/indicators_parent"
             android:layout_toStartOf="@+id/indicators_parent"
+            android:layout_alignWithParentIfMissing="true"
             android:layout_marginLeft="@dimen/message_bubble_edge_margin"
             android:layout_marginStart="@dimen/message_bubble_edge_margin"
             android:orientation="vertical"
