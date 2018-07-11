@@ -253,8 +253,23 @@ public class ConversationListItem extends RelativeLayout
     if (thread.getSnippetUri() != null) {
       this.thumbnailView.setVisibility(View.VISIBLE);
       this.thumbnailView.setImageResource(glideRequests, thread.getSnippetUri());
+
+      LayoutParams subjectParams = (RelativeLayout.LayoutParams)this.subjectView.getLayoutParams();
+      subjectParams.addRule(RelativeLayout.LEFT_OF, R.id.thumbnail);
+      if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN_MR1) {
+        subjectParams.addRule(RelativeLayout.START_OF, R.id.thumbnail);
+      }
+      this.subjectView.setLayoutParams(subjectParams);
+      this.post(new ThumbnailPositioner(thumbnailView, archivedView, deliveryStatusIndicator, dateView));
     } else {
       this.thumbnailView.setVisibility(View.GONE);
+
+      LayoutParams subjectParams = (RelativeLayout.LayoutParams)this.subjectView.getLayoutParams();
+      subjectParams.addRule(RelativeLayout.LEFT_OF, R.id.status);
+      if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN_MR1) {
+        subjectParams.addRule(RelativeLayout.START_OF, R.id.status);
+      }
+      this.subjectView.setLayoutParams(subjectParams);
     }
   }
 
@@ -348,4 +363,41 @@ public class ConversationListItem extends RelativeLayout
       setRippleColor(recipient);
     });
   }
+
+  private static class ThumbnailPositioner implements Runnable {
+
+    private final View thumbnailView;
+    private final View archivedView;
+    private final View deliveryStatusView;
+    private final View dateView;
+
+    ThumbnailPositioner(View thumbnailView, View archivedView, View deliveryStatusView, View dateView) {
+      this.thumbnailView      = thumbnailView;
+      this.archivedView       = archivedView;
+      this.deliveryStatusView = deliveryStatusView;
+      this.dateView           = dateView;
+    }
+
+    @Override
+    public void run() {
+      LayoutParams thumbnailParams = (RelativeLayout.LayoutParams)thumbnailView.getLayoutParams();
+
+      if (archivedView.getVisibility() == View.VISIBLE &&
+          (archivedView.getWidth() + deliveryStatusView.getWidth()) > dateView.getWidth())
+      {
+        thumbnailParams.addRule(RelativeLayout.LEFT_OF, R.id.status);
+        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN_MR1) {
+          thumbnailParams.addRule(RelativeLayout.START_OF, R.id.status);
+        }
+      } else {
+        thumbnailParams.addRule(RelativeLayout.LEFT_OF, R.id.date);
+        if (VERSION.SDK_INT >= VERSION_CODES.JELLY_BEAN_MR1) {
+          thumbnailParams.addRule(RelativeLayout.START_OF, R.id.date);
+        }
+      }
+
+      thumbnailView.setLayoutParams(thumbnailParams);
+    }
+  }
+
 }
