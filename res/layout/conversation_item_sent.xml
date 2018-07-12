@@ -130,30 +130,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:paddingBottom="4dp"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginBottom="4dp"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true" />
-
-        <TextView
-            android:id="@+id/indicator_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/body_bubble"
-            android:layout_alignParentRight="true"
-            android:paddingRight="5dip"
-            android:paddingLeft="5dip"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="22dp"
-            android:layout_marginTop="-3dp"
-            android:textSize="12sp"
-            android:textColor="?conversation_item_sent_text_indicator_tab_color"
-            android:background="?conversation_item_sent_indicator_text_background"
-            android:visibility="gone" />
 
     </RelativeLayout>
 

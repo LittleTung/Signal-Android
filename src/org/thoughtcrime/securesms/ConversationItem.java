@@ -112,7 +112,6 @@ public class ConversationItem extends LinearLayout
   private QuoteView              quoteView;
   private TextView               bodyText;
   private ConversationItemFooter footer;
-  private TextView               indicatorText;
   private TextView               groupSender;
   private TextView               groupSenderProfileName;
   private View                   groupSenderHolder;
@@ -159,7 +158,6 @@ public class ConversationItem extends LinearLayout
 
     this.bodyText                =            findViewById(R.id.conversation_item_body);
     this.footer                  =            findViewById(R.id.conversation_item_footer);
-    this.indicatorText           =            findViewById(R.id.indicator_text);
     this.groupSender             =            findViewById(R.id.group_message_sender);
     this.groupSenderProfileName  =            findViewById(R.id.group_message_sender_profile);
     this.alertView               =            findViewById(R.id.indicators_parent);
@@ -210,7 +208,6 @@ public class ConversationItem extends LinearLayout
     presentStatusIcons(messageRecord);
     presentContactPhoto(recipient);
     presentGroupMessageStatus(messageRecord, recipient);
-    setMinimumWidth();
     presentQuote(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
     ViewUtil.setPaddingBottom(this, getMessageSpacing(context, messageRecord, nextMessageRecord));
     setMessageMargins(messageRecord, groupThread);
@@ -578,8 +575,6 @@ public class ConversationItem extends LinearLayout
   }
 
   private void presentStatusIcons(MessageRecord messageRecord) {
-    indicatorText.setVisibility(View.GONE);
-
     bodyText.setCompoundDrawablesWithIntrinsicBounds(0, 0, messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0);
 
     if (messageRecord.isFailed()) {
@@ -712,26 +707,10 @@ public class ConversationItem extends LinearLayout
 
   private void setFailedStatusIcons() {
     alertView.setFailed();
-
-    if (messageRecord.isOutgoing()) {
-      indicatorText.setText(R.string.ConversationItem_click_for_details);
-      indicatorText.setVisibility(View.VISIBLE);
-    }
   }
 
   private void setFallbackStatusIcons() {
     alertView.setPendingApproval();
-    indicatorText.setVisibility(View.VISIBLE);
-    indicatorText.setText(R.string.ConversationItem_click_to_approve_unencrypted);
-  }
-
-  private void setMinimumWidth() {
-    if (indicatorText.getVisibility() == View.VISIBLE && indicatorText.getText() != null) {
-      final float density = getResources().getDisplayMetrics().density;
-      bodyBubble.setMinimumWidth(indicatorText.getText().length() * (int) (6.5 * density) + (int) (22.0 * density));
-    } else {
-      bodyBubble.setMinimumWidth(0);
-    }
   }
 
   private boolean shouldInterceptClicks(MessageRecord messageRecord) {
