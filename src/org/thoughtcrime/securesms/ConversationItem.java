@@ -216,7 +216,7 @@ public class ConversationItem extends LinearLayout
     setMessageMargins(messageRecord, groupThread);
     setAuthorTitleVisibility(messageRecord, previousMessageRecord, groupThread);
     setAuthorAvatarVisibility(messageRecord, nextMessageRecord, groupThread);
-    presentFooter(messageRecord, previousMessageRecord, locale, groupThread);
+    presentFooter(messageRecord, nextMessageRecord, locale, groupThread);
   }
 
   @Override
@@ -678,7 +678,7 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void presentFooter(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Locale locale, boolean isGroupThread) {
+  private void presentFooter(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, @NonNull Locale locale, boolean isGroupThread) {
     ViewUtil.updateLayoutParams(footer, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
     ViewUtil.setPaddingBottom(bodyBubble, 0);
 
@@ -686,8 +686,8 @@ public class ConversationItem extends LinearLayout
     if (sharedContactStub.resolved()) sharedContactStub.get().getFooter().setVisibility(GONE);
     if (mediaThumbnailStub.resolved()) mediaThumbnailStub.get().getFooter().setVisibility(GONE);
 
-    boolean differentMinutes = previous.isPresent() && !DateUtils.isSameBriefRelativeTimestamp(context, locale, previous.get().getTimestamp(), current.getTimestamp());
-    if (current.isOutgoing() || current.getExpiresIn() > 0 || !current.isSecure() || differentMinutes || isStartOfMessageCluster(current, previous, isGroupThread)) {
+    boolean differentMinutes = next.isPresent() && !DateUtils.isSameBriefRelativeTimestamp(context, locale, next.get().getTimestamp(), current.getTimestamp());
+    if (current.isOutgoing() || current.getExpiresIn() > 0 || !current.isSecure() || differentMinutes || isEndOfMessageCluster(current, next, isGroupThread)) {
       ConversationItemFooter activeFooter = getActiveFooter(current);
       activeFooter.setVisibility(VISIBLE);
       activeFooter.setMessageRecord(current, locale);
