@@ -27,7 +27,6 @@ import android.net.Uri;
 import android.support.annotation.DimenRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -208,11 +207,9 @@ public class ConversationItem extends LinearLayout
     presentStatusIcons(messageRecord);
     presentContactPhoto(recipient);
     presentGroupMessageStatus(messageRecord, recipient);
+    presentAuthor(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
     presentQuote(messageRecord, previousMessageRecord, nextMessageRecord, groupThread);
-    ViewUtil.setPaddingBottom(this, getMessageSpacing(context, messageRecord, nextMessageRecord));
-    setMessageMargins(messageRecord, groupThread);
-    setAuthorTitleVisibility(messageRecord, previousMessageRecord, groupThread);
-    setAuthorAvatarVisibility(messageRecord, nextMessageRecord, groupThread);
+    presentMessageSpacing(messageRecord, nextMessageRecord, groupThread);
     presentFooter(messageRecord, nextMessageRecord, locale, groupThread);
   }
 
@@ -624,15 +621,17 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void setMessageMargins(@NonNull MessageRecord message, boolean isGroupThread) {
+  private void presentMessageSpacing(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    ViewUtil.setPaddingBottom(this, getMessageSpacing(context, current, next));
+
     if (isGroupThread) {
-      if (message.isOutgoing()) {
+      if (current.isOutgoing()) {
         ViewUtil.setLeftMargin(container, readDimen(R.dimen.conversation_group_left_gutter));
       } else {
         ViewUtil.setLeftMargin(bodyBubble, readDimen(R.dimen.conversation_group_left_gutter));
       }
     } else {
-      if (message.isOutgoing()) {
+      if (current.isOutgoing()) {
         ViewUtil.setLeftMargin(container, readDimen(R.dimen.conversation_individual_left_gutter));
       } else {
         ViewUtil.setLeftMargin(bodyBubble, readDimen(R.dimen.conversation_individual_left_gutter));
@@ -646,31 +645,6 @@ public class ConversationItem extends LinearLayout
                                         boolean                 isGroupThread)
   {
     bodyBubble.setBackgroundResource(getCornerBackgroundRes(current, previous, next, isGroupThread));
-  }
-
-  private void setAuthorTitleVisibility(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
-    if (isGroupThread && !current.isOutgoing()) {
-      if (!previous.isPresent() || previous.get().isUpdate() || !current.getRecipient().getAddress().equals(previous.get().getRecipient().getAddress())) {
-        groupSenderHolder.setVisibility(VISIBLE);
-        ViewUtil.setPaddingTop(bodyBubble, readDimen(R.dimen.message_bubble_top_padding));
-      } else {
-        groupSenderHolder.setVisibility(GONE);
-      }
-    } else {
-      groupSenderHolder.setVisibility(GONE);
-    }
-  }
-
-  private void setAuthorAvatarVisibility(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
-    if (isGroupThread && !current.isOutgoing()) {
-      if (!next.isPresent() || next.get().isUpdate() || !current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress())) {
-        contactPhoto.setVisibility(VISIBLE);
-      } else {
-        contactPhoto.setVisibility(GONE);
-      }
-    } else if (contactPhoto != null) {
-      contactPhoto.setVisibility(GONE);
-    }
   }
 
   private void presentFooter(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, @NonNull Locale locale, boolean isGroupThread) {
@@ -721,15 +695,38 @@ public class ConversationItem extends LinearLayout
   }
 
   @SuppressLint("SetTextI18n")
-  private void presentGroupMessageStatus(MessageRecord messageRecord, Recipient recipient) {
+  private void presentGroupMessageStatus(@NonNull MessageRecord current, @NonNull Recipient recipient) {
     this.groupSender.setText(recipient.toShortString());
 
-    if (recipient.getName() == null && !TextUtils.isEmpty(recipient.getProfileName()) && !messageRecord.isOutgoing()) {
+    if (recipient.getName() == null && !TextUtils.isEmpty(recipient.getProfileName()) && !current.isOutgoing()) {
       this.groupSenderProfileName.setText("~" + recipient.getProfileName());
       this.groupSenderProfileName.setVisibility(View.VISIBLE);
     } else {
       this.groupSenderProfileName.setText(null);
       this.groupSenderProfileName.setVisibility(View.GONE);
+    }
+  }
+
+  private void presentAuthor(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+    if (isGroupThread && !current.isOutgoing()) {
+      if (!previous.isPresent() || previous.get().isUpdate() || !current.getRecipient().getAddress().equals(previous.get().getRecipient().getAddress())) {
+        groupSenderHolder.setVisibility(VISIBLE);
+        ViewUtil.setPaddingTop(bodyBubble, readDimen(R.dimen.message_bubble_top_padding));
+      } else {
+        groupSenderHolder.setVisibility(GONE);
+      }
+
+      if (!next.isPresent() || next.get().isUpdate() || !current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress())) {
+        contactPhoto.setVisibility(VISIBLE);
+      } else {
+        contactPhoto.setVisibility(GONE);
+      }
+    } else {
+      groupSenderHolder.setVisibility(GONE);
+
+      if (contactPhoto != null) {
+        contactPhoto.setVisibility(GONE);
+      }
     }
   }
 
