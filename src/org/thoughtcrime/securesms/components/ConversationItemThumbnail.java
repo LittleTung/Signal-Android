@@ -108,10 +108,6 @@ public class ConversationItemThumbnail extends FrameLayout {
     cornerMask.setRadii(topLeft, topRight, bottomRight, bottomLeft);
   }
 
-  public void setImageBackground(@DrawableRes int resId) {
-    thumbnail.setImageBackground(resId);
-  }
-
   @UiThread
   public void setImageResource(@NonNull GlideRequests glideRequests, @NonNull Slide slide,
                                boolean showControls, boolean isPreview)

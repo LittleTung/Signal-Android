@@ -218,10 +218,6 @@ public class ThumbnailView extends FrameLayout {
     forceLayout();
   }
 
-  public void setImageBackground(@DrawableRes int resId) {
-    image.setBackgroundResource(resId);
-  }
-
   @UiThread
   public void setImageResource(@NonNull GlideRequests glideRequests, @NonNull Slide slide,
                                boolean showControls, boolean isPreview)

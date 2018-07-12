@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/message_bubble_horizontal_padding"
             android:layout_marginRight="@dimen/message_bubble_horizontal_padding"
-            android:layout_marginTop="@dimen/message_bubble_footer_top_padding"
+            android:layout_marginTop="4dp"
             android:elevation="9dp"
             android:orientation="horizontal" />
 
