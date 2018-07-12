@@ -23,7 +23,7 @@ public enum MaterialColor {
   ORANGE     (R.color.conversation_orange, R.color.conversation_orange_shade, "orange"),
   GREY       (R.color.conversation_grey,   R.color.conversation_grey_shade,   "grey");
 
-  private static Map<String, MaterialColor> colorMap = new HashMap<String, MaterialColor>() {{
+  private static final Map<String, MaterialColor> COLOR_MATCHES = new HashMap<String, MaterialColor>() {{
     put("red", RED);
     put("brown", RED);
     put("pink", PINK);
@@ -121,8 +121,8 @@ public enum MaterialColor {
   }
 
   public static MaterialColor fromSerialized(String serialized) throws UnknownColorException {
-    if (colorMap.containsKey(serialized)) {
-      return colorMap.get(serialized);
+    if (COLOR_MATCHES.containsKey(serialized)) {
+      return COLOR_MATCHES.get(serialized);
     }
 
     throw new UnknownColorException("Unknown color: " + serialized);

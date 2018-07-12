@@ -545,8 +545,8 @@ public class RecipientPreferenceActivity extends PassphraseRequiredActionBarActi
 
               if (recipient.resolve().isGroupRecipient()) {
                 ApplicationContext.getInstance(context)
-                    .getJobManager()
-                    .add(new MultiDeviceGroupUpdateJob(context));
+                                  .getJobManager()
+                                  .add(new MultiDeviceGroupUpdateJob(context));
               } else if (recipient.resolve().getRegistered() == RecipientDatabase.RegisteredState.REGISTERED) {
                 ApplicationContext.getInstance(context)
                                   .getJobManager()

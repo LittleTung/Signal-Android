@@ -754,47 +754,47 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  static int getCornerBackgroundRes(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+  private int getCornerBackgroundRes(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
     if (isSingularMessage(current, previous, next, isGroupThread)) {
       return current.isOutgoing() ? R.drawable.message_bubble_background_sent_alone
-          : R.drawable.message_bubble_background_received_alone;
+                                  : R.drawable.message_bubble_background_received_alone;
     } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
       return current.isOutgoing() ? R.drawable.message_bubble_background_sent_start
-          : R.drawable.message_bubble_background_received_start;
+                                  : R.drawable.message_bubble_background_received_start;
     } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
       return current.isOutgoing() ? R.drawable.message_bubble_background_sent_end
-          : R.drawable.message_bubble_background_received_end;
+                                  : R.drawable.message_bubble_background_received_end;
     } else {
       return current.isOutgoing() ? R.drawable.message_bubble_background_sent_middle
-          : R.drawable.message_bubble_background_received_middle;
+                                  : R.drawable.message_bubble_background_received_middle;
     }
   }
 
-  static boolean isStartOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
+  private boolean isStartOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, boolean isGroupThread) {
     if (isGroupThread) {
       return !previous.isPresent() || previous.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), previous.get().getTimestamp()) ||
-          !current.getRecipient().getAddress().equals(previous.get().getRecipient().getAddress());
+             !current.getRecipient().getAddress().equals(previous.get().getRecipient().getAddress());
     } else {
       return !previous.isPresent() || previous.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), previous.get().getTimestamp()) ||
-          current.isOutgoing() != previous.get().isOutgoing();
+             current.isOutgoing() != previous.get().isOutgoing();
     }
   }
 
-  static boolean isEndOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+  private boolean isEndOfMessageCluster(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
     if (isGroupThread) {
       return !next.isPresent() || next.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), next.get().getTimestamp()) ||
-          !current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
+             !current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
     } else {
       return !next.isPresent() || next.get().isUpdate() || !DateUtils.isSameDay(current.getTimestamp(), next.get().getTimestamp()) ||
-          current.isOutgoing() != next.get().isOutgoing();
+             current.isOutgoing() != next.get().isOutgoing();
     }
   }
 
-  static boolean isSingularMessage(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
+  private boolean isSingularMessage(@NonNull MessageRecord current, @NonNull Optional<MessageRecord> previous, @NonNull Optional<MessageRecord> next, boolean isGroupThread) {
     return isStartOfMessageCluster(current, previous, isGroupThread) && isEndOfMessageCluster(current, next, isGroupThread);
   }
 
-  static int getMessageSpacing(@NonNull Context context, @NonNull MessageRecord current, @NonNull Optional<MessageRecord> next) {
+  private int getMessageSpacing(@NonNull Context context, @NonNull MessageRecord current, @NonNull Optional<MessageRecord> next) {
     if (next.isPresent()) {
       boolean recipientsMatch = current.getRecipient().getAddress().equals(next.get().getRecipient().getAddress());
       boolean outgoingMatch   = current.isOutgoing() == next.get().isOutgoing();
@@ -806,7 +806,7 @@ public class ConversationItem extends LinearLayout
     return readDimen(context, R.dimen.conversation_vertical_message_spacing_collapse);
   }
 
-  static int readDimen(@NonNull Context context, @DimenRes int dimenId) {
+  private int readDimen(@NonNull Context context, @DimenRes int dimenId) {
     return context.getResources().getDimensionPixelOffset(dimenId);
   }
 
