@@ -414,8 +414,8 @@
     <string name="MessageRecord_called_s">Called %s</string>
     <string name="MessageRecord_missed_call_from">Missed call from %s</string>
     <string name="MessageRecord_s_joined_signal">%s is on Signal!</string>
-    <string name="MessageRecord_you_set_disappearing_message_time_to_s">You set disappearing message time to %1$s.</string>
-    <string name="MessageRecord_s_set_disappearing_message_time_to_s">%1$s set disappearing message time to %2$s.</string>
+    <string name="MessageRecord_you_set_disappearing_message_time_to_s">You set the disappearing message timer to %1$s.</string>
+    <string name="MessageRecord_s_set_disappearing_message_time_to_s">%1$s set the disappearing message timer to %2$s.</string>
     <string name="MessageRecord_your_safety_number_with_s_has_changed">Your safety number with %s has changed.</string>
     <string name="MessageRecord_you_marked_your_safety_number_with_s_verified">You marked your safety number with %s verified</string>
     <string name="MessageRecord_you_marked_your_safety_number_with_s_verified_from_another_device">You marked your safety number with %s verified from another device</string>
