@@ -133,6 +133,7 @@
 
     <attr name="shared_contact_details_header_background" format="color"/>
     <attr name="shared_contact_details_titlebar" format="color"/>
+    <attr name="shared_contact_item_button_color" format="color"/>
 
     <attr name="search_toolbar_background" format="color"/>
     <attr name="search_background" format="color"/>
@@ -245,6 +246,8 @@
             <enum name="outgoing" value="1" />
             <enum name="incoming" value="2" />
         </attr>
+        <attr name="quote_colorPrimary" format="color" />
+        <attr name="quote_colorSecondary" format="color" />
     </declare-styleable>
 
     <declare-styleable name="SharedContactView">

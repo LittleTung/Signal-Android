@@ -98,26 +98,13 @@ public enum MaterialColor {
 
   public int toQuoteBackgroundColor(@NonNull Context context, boolean outgoing) {
     if (outgoing) {
-      if (isDarkTheme(context)) {
-        return context.getResources().getColor(R.color.transparent_white_60);
-      } else {
-        int color = toConversationColor(context);
-        return Color.argb(0x44, Color.red(color), Color.green(color), Color.blue(color));
-      }
+      int color = toConversationColor(context);
+      int alpha = isDarkTheme(context) ? (int) (0.2 * 255) : (int) (0.4 * 255);
+
+      return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
     }
-    return context.getResources().getColor(isDarkTheme(context) ? R.color.transparent_white_70
+    return context.getResources().getColor(isDarkTheme(context) ? R.color.transparent_black_70
                                                                 : R.color.transparent_white_aa);
-  }
-
-  public int toQuoteIconForegroundColor(@NonNull Context context, boolean outgoing) {
-    if (outgoing) {
-      return context.getResources().getColor(R.color.white);
-    }
-    return toConversationColor(context);
-  }
-
-  public int toQuoteIconBackgroundColor(@NonNull Context context, boolean outgoing) {
-    return context.getResources().getColor(toQuoteBarColorResource(context, outgoing));
   }
 
   public boolean represents(Context context, int colorValue) {

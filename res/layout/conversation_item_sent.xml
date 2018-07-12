@@ -49,6 +49,8 @@
                 android:layout_marginRight="@dimen/message_bubble_quote_padding"
                 android:visibility="gone"
                 app:message_type="outgoing"
+                app:quote_colorPrimary="?attr/conversation_item_sent_text_primary_color"
+                app:quote_colorSecondary="?attr/conversation_item_sent_text_primary_color"
                 tools:visibility="visible"/>
 
             <ViewStub

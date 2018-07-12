@@ -3,6 +3,7 @@ package org.thoughtcrime.securesms.components;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -99,11 +100,24 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     rootView.setRadii(largeCornerRadius, largeCornerRadius, smallCornerRadius, smallCornerRadius);
 
     if (attrs != null) {
-      TypedArray typedArray  = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.QuoteView, 0, 0);
-                 messageType = typedArray.getInt(R.styleable.QuoteView_message_type, 0);
+      TypedArray typedArray     = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.QuoteView, 0, 0);
+      int        primaryColor   = typedArray.getColor(R.styleable.QuoteView_quote_colorPrimary, Color.BLACK);
+      int        secondaryColor = typedArray.getColor(R.styleable.QuoteView_quote_colorSecondary, Color.BLACK);
+      messageType = typedArray.getInt(R.styleable.QuoteView_message_type, 0);
       typedArray.recycle();
 
       dismissView.setVisibility(messageType == MESSAGE_TYPE_PREVIEW ? VISIBLE : GONE);
+
+      authorView.setTextColor(primaryColor);
+      bodyView.setTextColor(primaryColor);
+      attachmentNameView.setTextColor(primaryColor);
+      mediaDescriptionText.setTextColor(secondaryColor);
+
+      if (messageType == MESSAGE_TYPE_PREVIEW) {
+        int radius = getResources().getDimensionPixelOffset(R.dimen.quote_corner_radius_preview);
+        rootView.setTopLeftRadius(radius);
+        rootView.setTopRightRadius(radius);
+      }
     }
 
     dismissView.setOnClickListener(view -> setVisibility(GONE));
@@ -125,7 +139,7 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     author.addListener(this);
     setQuoteAuthor(author);
     setQuoteText(body, attachments);
-    setQuoteAttachment(glideRequests, attachments, author);
+    setQuoteAttachment(glideRequests, attachments);
   }
 
   public void setTopCornerSizes(boolean topLeftLarge, boolean topRightLarge) {
@@ -193,10 +207,7 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
     }
   }
 
-  private void setQuoteAttachment(@NonNull GlideRequests glideRequests,
-                                  @NonNull SlideDeck slideDeck,
-                                  @NonNull Recipient author)
-  {
+  private void setQuoteAttachment(@NonNull GlideRequests glideRequests, @NonNull SlideDeck slideDeck) {
     List<Slide> imageVideoSlides = Stream.of(slideDeck.getSlides()).filter(s -> s.hasImage() || s.hasVideo()).limit(1).toList();
     List<Slide> documentSlides   = Stream.of(attachments.getSlides()).filter(Slide::hasDocument).limit(1).toList();
 
