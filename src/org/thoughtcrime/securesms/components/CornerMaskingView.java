@@ -8,6 +8,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.RectF;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -15,10 +16,12 @@ import android.widget.FrameLayout;
 
 public class CornerMaskingView extends FrameLayout {
 
-  private final float[] radii   = new float[8];
-  private final Paint   paint   = new Paint();
-  private final Path    corners = new Path();
-  private final RectF   bounds  = new RectF();
+  private final float[] radii      = new float[8];
+  private final Paint   dstPaint   = new Paint();
+  private final Paint   clearPaint = new Paint();
+  private final Path    outline    = new Path();
+  private final Path    corners    = new Path();
+  private final RectF   bounds     = new RectF();
 
   public CornerMaskingView(@NonNull Context context) {
     super(context);
@@ -38,10 +41,15 @@ public class CornerMaskingView extends FrameLayout {
   private void init() {
     setLayerType(LAYER_TYPE_HARDWARE, null);
 
-    paint.setColor(Color.BLACK);
-    paint.setStyle(Paint.Style.FILL);
-    paint.setAntiAlias(true);
-    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+    dstPaint.setColor(Color.BLACK);
+    dstPaint.setStyle(Paint.Style.FILL);
+    dstPaint.setAntiAlias(true);
+    dstPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+
+    clearPaint.setColor(Color.BLACK);
+    clearPaint.setStyle(Paint.Style.FILL);
+    clearPaint.setAntiAlias(true);
+    clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
   }
 
   @Override
@@ -56,7 +64,18 @@ public class CornerMaskingView extends FrameLayout {
     corners.reset();
     corners.addRoundRect(bounds, radii, Path.Direction.CW);
 
-    canvas.drawPath(corners, paint);
+    // Note: There's a bug in the P beta where most PorterDuff modes aren't working. But CLEAR does.
+    //       So we find and inverse path and use Mode.CLEAR for versions that support Path.op().
+    //       See issue https://issuetracker.google.com/issues/111394085.
+    if (Build.VERSION.SDK_INT >= 19) {
+      outline.reset();
+      outline.addRect(bounds, Path.Direction.CW);
+      outline.op(corners, Path.Op.DIFFERENCE);
+      canvas.drawPath(outline, clearPaint);
+    } else {
+      corners.addRoundRect(bounds, radii, Path.Direction.CW);
+      canvas.drawPath(corners, dstPaint);
+    }
   }
 
   public void setRadius(int radius) {
