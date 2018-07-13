@@ -141,6 +141,8 @@
         <item name="conversation_background">@color/core_white</item>
         <item name="conversation_editor_background">#22000000</item>
         <item name="conversation_editor_text_color">#ff111111</item>
+        <item name="conversation_input_background_color">@color/core_light_02</item>
+        <item name="conversation_input_outline_color">@color/core_light_10</item>
         <item name="conversation_transport_sms_indicator">@drawable/ic_send_sms_insecure</item>
         <item name="conversation_transport_push_indicator">@drawable/ic_send_push</item>
         <item name="conversation_transport_popup_background">@color/white</item>
@@ -299,6 +301,8 @@
         <item name="conversation_background">@color/black</item>
         <item name="conversation_editor_background">#22ffffff</item>
         <item name="conversation_editor_text_color">#ffeeeeee</item>
+        <item name="conversation_input_background_color">@color/core_dark_85</item>
+        <item name="conversation_input_outline_color">@color/core_dark_70</item>
         <item name="conversation_transport_sms_indicator">@drawable/ic_send_sms_insecure_dark</item>
         <item name="conversation_transport_push_indicator">@drawable/ic_send_push</item>
         <item name="conversation_transport_popup_background">@color/black</item>
