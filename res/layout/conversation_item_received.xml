@@ -99,8 +99,8 @@
                 android:layout_marginRight="6dp"
                 android:visibility="gone"
                 app:message_type="incoming"
-                app:quote_colorPrimary="?attr/conversation_item_received_text_primary_color"
-                app:quote_colorSecondary="?attr/conversation_item_received_text_primary_color"
+                app:quote_colorPrimary="?attr/conversation_item_quote_text_color"
+                app:quote_colorSecondary="?attr/conversation_item_quote_text_color"
                 tools:visibility="visible"/>
 
             <ViewStub

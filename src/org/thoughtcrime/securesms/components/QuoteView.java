@@ -174,7 +174,6 @@ public class QuoteView extends LinearLayout implements RecipientModifiedListener
 
     authorView.setText(isOwnNumber ? getContext().getString(R.string.QuoteView_you)
                                    : author.toShortString());
-    authorView.setTextColor(author.getColor().toActionBarColor(getContext()));
 
     // We use the raw color resource because Android 4.x was struggling with tints here
     quoteBarView.setImageResource(author.getColor().toQuoteBarColorResource(getContext(), outgoing));
