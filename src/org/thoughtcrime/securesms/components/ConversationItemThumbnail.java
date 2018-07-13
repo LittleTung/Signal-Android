@@ -53,7 +53,7 @@ public class ConversationItemThumbnail extends FrameLayout {
     this.cornerMask = findViewById(R.id.conversation_thumbnail_corner_mask);
     this.footer     = findViewById(R.id.conversation_thumbnail_footer);
 
-    setCornerRadius(getResources().getDimensionPixelSize(R.dimen.message_corner_radius));
+    setCornerRadius(0);
     setTouchDelegate(thumbnail.getTouchDelegate());
 
     if (attrs != null) {

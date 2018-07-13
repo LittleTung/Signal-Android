@@ -161,6 +161,7 @@
         <attr name="maxWidth" format="dimension" />
         <attr name="minHeight" format="dimension" />
         <attr name="maxHeight" format="dimension" />
+        <attr name="thumbnail_radius" format="dimension" />
     </declare-styleable>
 
     <declare-styleable name="DeliveryStatusView">
