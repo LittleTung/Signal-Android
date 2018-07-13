@@ -2,6 +2,7 @@ package org.thoughtcrime.securesms.components;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.DrawableRes;
@@ -27,7 +28,6 @@ public class ConversationItemThumbnail extends FrameLayout {
 
   private ThumbnailView          thumbnail;
   private ImageView              shade;
-  private CornerMaskingView      cornerMask;
   private ConversationItemFooter footer;
 
   public ConversationItemThumbnail(Context context) {
@@ -50,10 +50,8 @@ public class ConversationItemThumbnail extends FrameLayout {
 
     this.thumbnail  = findViewById(R.id.conversation_thumbnail_image);
     this.shade      = findViewById(R.id.conversation_thumbnail_shade);
-    this.cornerMask = findViewById(R.id.conversation_thumbnail_corner_mask);
     this.footer     = findViewById(R.id.conversation_thumbnail_footer);
 
-    setCornerRadius(0);
     setTouchDelegate(thumbnail.getTouchDelegate());
 
     if (attrs != null) {
@@ -64,6 +62,11 @@ public class ConversationItemThumbnail extends FrameLayout {
                           typedArray.getDimensionPixelSize(R.styleable.ConversationItemThumbnail_conversationThumbnail_maxHeight, 0));
       typedArray.recycle();
     }
+  }
+
+  @Override
+  protected void dispatchDraw(Canvas canvas) {
+    super.dispatchDraw(canvas);
   }
 
   @Override
@@ -98,14 +101,6 @@ public class ConversationItemThumbnail extends FrameLayout {
 
   public ConversationItemFooter getFooter() {
     return footer;
-  }
-
-  public void setCornerRadius(int radius) {
-    setCornerRadii(radius, radius, radius, radius);
-  }
-
-  public void setCornerRadii(int topLeft, int topRight, int bottomRight, int bottomLeft) {
-    cornerMask.setRadii(topLeft, topRight, bottomRight, bottomLeft);
   }
 
   @UiThread
