@@ -200,7 +200,7 @@ public class ConversationItem extends LinearLayout
     this.recipient.addListener(this);
     this.conversationRecipient.addListener(this);
 
-    setMediaAttributes(messageRecord, conversationRecipient);
+    setMediaAttributes(messageRecord, nextMessageRecord, previousMessageRecord, conversationRecipient, groupThread);
     setInteractionState(messageRecord, pulseHighlight);
     setBodyText(messageRecord);
     setBubbleState(messageRecord);
@@ -385,7 +385,12 @@ public class ConversationItem extends LinearLayout
     }
   }
 
-  private void setMediaAttributes(@NonNull MessageRecord messageRecord, @NonNull Recipient conversationRecipient) {
+  private void setMediaAttributes(@NonNull MessageRecord           messageRecord,
+                                  @NonNull Optional<MessageRecord> previousRecord,
+                                  @NonNull Optional<MessageRecord> nextRecord,
+                                  @NonNull Recipient               conversationRecipient,
+                                           boolean                 isGroupThread)
+  {
     boolean showControls = !messageRecord.isFailed() && !Util.isOwnNumber(context, conversationRecipient.getAddress());
 
     if (hasSharedContact(messageRecord)) {
@@ -449,6 +454,8 @@ public class ConversationItem extends LinearLayout
       mediaThumbnailStub.get().setOnClickListener(passthroughClickListener);
       mediaThumbnailStub.get().showShade(TextUtils.isEmpty(messageRecord.getDisplayBody()));
 
+      setThumbnailOutlineCorners(messageRecord, nextRecord, previousRecord, isGroupThread);
+
       ViewUtil.updateLayoutParams(bodyText, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
       footer.setVisibility(VISIBLE);
     } else {
@@ -460,6 +467,64 @@ public class ConversationItem extends LinearLayout
       ViewUtil.updateLayoutParams(bodyText, ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
       footer.setVisibility(VISIBLE);
     }
+  }
+
+  private void setThumbnailOutlineCorners(@NonNull MessageRecord           current,
+                                          @NonNull Optional<MessageRecord> previous,
+                                          @NonNull Optional<MessageRecord> next,
+                                                   boolean                 isGroupThread)
+  {
+    int defaultRadius  = readDimen(R.dimen.message_corner_radius);
+    int collapseRadius = readDimen(R.dimen.message_corner_collapse_radius);
+
+    int topLeft     = defaultRadius;
+    int topRight    = defaultRadius;
+    int bottomLeft  = defaultRadius;
+    int bottomRight = defaultRadius;
+
+    if (isSingularMessage(current, previous, next, isGroupThread)) {
+      topLeft     = defaultRadius;
+      topRight    = defaultRadius;
+      bottomLeft  = defaultRadius;
+      bottomRight = defaultRadius;
+    } else if (isStartOfMessageCluster(current, previous, isGroupThread)) {
+      if (current.isOutgoing()) {
+        bottomRight = collapseRadius;
+      } else {
+        bottomLeft = collapseRadius;
+      }
+    } else if (isEndOfMessageCluster(current, next, isGroupThread)) {
+      if (current.isOutgoing()) {
+        topRight = collapseRadius;
+      } else {
+        topLeft = collapseRadius;
+      }
+    } else {
+      if (current.isOutgoing()) {
+        topRight    = collapseRadius;
+        bottomRight = collapseRadius;
+      } else {
+        topLeft    = collapseRadius;
+        bottomLeft = collapseRadius;
+      }
+    }
+
+    if (!TextUtils.isEmpty(current.getDisplayBody())) {
+      bottomLeft  = 0;
+      bottomRight = 0;
+    }
+
+    if (isStartOfMessageCluster(current, previous, isGroupThread) && !current.isOutgoing() && isGroupThread) {
+      topLeft  = 0;
+      topRight = 0;
+    }
+
+    if (hasQuote(messageRecord)) {
+      topLeft  = 0;
+      topRight = 0;
+    }
+
+    mediaThumbnailStub.get().setOutlineCorners(topLeft, topRight, bottomRight, bottomLeft);
   }
 
   private void setContactPhoto(@NonNull Recipient recipient) {

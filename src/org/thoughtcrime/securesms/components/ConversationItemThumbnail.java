@@ -4,14 +4,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.net.Uri;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -19,16 +19,35 @@ import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.mms.GlideRequests;
 import org.thoughtcrime.securesms.mms.Slide;
 import org.thoughtcrime.securesms.mms.SlideClickListener;
-
-import static com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade;
+import org.thoughtcrime.securesms.util.ThemeUtil;
 
 public class ConversationItemThumbnail extends FrameLayout {
 
   private static final String TAG = ConversationItemThumbnail.class.getSimpleName();
 
+  private static final Paint LIGHT_THEME_OUTLINE_PAINT = new Paint();
+  private static final Paint DARK_THEME_OUTLINE_PAINT = new Paint();
+
+  static {
+    LIGHT_THEME_OUTLINE_PAINT.setColor(Color.argb((int) (255 * 0.2), 0, 0, 0));
+    LIGHT_THEME_OUTLINE_PAINT.setStyle(Paint.Style.STROKE);
+    LIGHT_THEME_OUTLINE_PAINT.setStrokeWidth(1f);
+    LIGHT_THEME_OUTLINE_PAINT.setAntiAlias(true);
+
+    DARK_THEME_OUTLINE_PAINT.setColor(Color.argb((int) (255 * 0.2), 255, 255, 255));
+    DARK_THEME_OUTLINE_PAINT.setStyle(Paint.Style.STROKE);
+    DARK_THEME_OUTLINE_PAINT.setStrokeWidth(1f);
+    DARK_THEME_OUTLINE_PAINT.setAntiAlias(true);
+  }
+
+  private final float[] radii   = new float[8];
+  private final RectF   bounds  = new RectF();
+  private final Path    corners = new Path();
+
   private ThumbnailView          thumbnail;
   private ImageView              shade;
   private ConversationItemFooter footer;
+  private Paint                  outlinePaint;
 
   public ConversationItemThumbnail(Context context) {
     super(context);
@@ -48,9 +67,10 @@ public class ConversationItemThumbnail extends FrameLayout {
   private void init(@Nullable AttributeSet attrs) {
     inflate(getContext(), R.layout.conversation_item_thumbnail, this);
 
-    this.thumbnail  = findViewById(R.id.conversation_thumbnail_image);
-    this.shade      = findViewById(R.id.conversation_thumbnail_shade);
-    this.footer     = findViewById(R.id.conversation_thumbnail_footer);
+    this.thumbnail    = findViewById(R.id.conversation_thumbnail_image);
+    this.shade        = findViewById(R.id.conversation_thumbnail_shade);
+    this.footer       = findViewById(R.id.conversation_thumbnail_footer);
+    this.outlinePaint = ThemeUtil.isDarkTheme(getContext()) ? DARK_THEME_OUTLINE_PAINT : LIGHT_THEME_OUTLINE_PAINT;
 
     setTouchDelegate(thumbnail.getTouchDelegate());
 
@@ -64,9 +84,22 @@ public class ConversationItemThumbnail extends FrameLayout {
     }
   }
 
+  @SuppressWarnings("SuspiciousNameCombination")
   @Override
   protected void dispatchDraw(Canvas canvas) {
     super.dispatchDraw(canvas);
+
+    final float halfStrokeWidth = outlinePaint.getStrokeWidth() / 2;
+
+    bounds.left   = halfStrokeWidth;
+    bounds.top    = halfStrokeWidth;
+    bounds.right  = canvas.getWidth() - halfStrokeWidth;
+    bounds.bottom = canvas.getHeight() - halfStrokeWidth;
+
+    corners.reset();
+    corners.addRoundRect(bounds, radii, Path.Direction.CW);
+
+    canvas.drawPath(corners, outlinePaint);
   }
 
   @Override
@@ -97,6 +130,13 @@ public class ConversationItemThumbnail extends FrameLayout {
   public void showShade(boolean show) {
     shade.setVisibility(show ? VISIBLE : GONE);
     forceLayout();
+  }
+
+  public void setOutlineCorners(int topLeft, int topRight, int bottomRight, int bottomLeft) {
+    radii[0] = radii[1] = topLeft;
+    radii[2] = radii[3] = topRight;
+    radii[4] = radii[5] = bottomRight;
+    radii[6] = radii[7] = bottomLeft;
   }
 
   public ConversationItemFooter getFooter() {
