@@ -1,6 +1,7 @@
 package org.thoughtcrime.securesms.components;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,8 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
+import org.thoughtcrime.securesms.R;
+
 public class CornerMaskingView extends FrameLayout {
 
   private final float[] radii      = new float[8];
@@ -25,20 +28,20 @@ public class CornerMaskingView extends FrameLayout {
 
   public CornerMaskingView(@NonNull Context context) {
     super(context);
-    init();
+    init(null);
   }
 
   public CornerMaskingView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
-    init();
+    init(attrs);
   }
 
   public CornerMaskingView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
-    init();
+    init(attrs);
   }
 
-  private void init() {
+  private void init(@Nullable AttributeSet attrs) {
     setLayerType(LAYER_TYPE_HARDWARE, null);
 
     dstPaint.setColor(Color.BLACK);
@@ -50,6 +53,12 @@ public class CornerMaskingView extends FrameLayout {
     clearPaint.setStyle(Paint.Style.FILL);
     clearPaint.setAntiAlias(true);
     clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+
+    if (attrs != null) {
+      TypedArray typedArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.CornerMaskingView, 0, 0);
+      setRadius(typedArray.getDimensionPixelOffset(R.styleable.CornerMaskingView_cmv_radius, 0));
+      typedArray.recycle();
+    }
   }
 
   @Override
