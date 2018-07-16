@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="theme_type" format="string"/>
+
     <attr name="attachment_type_selector_background" format="color"/>
+    <attr name="attachment_document_icon_small" format="reference" />
+    <attr name="attachment_document_icon_large" format="reference" />
+
     <attr name="conversation_list_item_background" format="reference"/>
     <attr name="conversation_list_item_contact_color" format="reference|color"/>
     <attr name="conversation_list_item_subject_color" format="reference|color"/>
