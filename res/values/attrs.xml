@@ -77,6 +77,8 @@
     <attr name="conversation_item_last_seen_line_color" format="reference"/>
     <attr name="conversation_item_date_line_color" format="reference"/>
     <attr name="conversation_item_quote_text_color" format="reference"/>
+    <attr name="conversation_item_sticky_date_background_color" format="color" />
+    <attr name="conversation_item_sticky_date_text_color" format="color" />
 
     <attr name="dialog_info_icon" format="reference" />
     <attr name="dialog_alert_icon" format="reference" />
