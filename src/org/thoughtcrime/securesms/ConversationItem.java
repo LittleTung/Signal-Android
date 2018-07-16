@@ -100,7 +100,9 @@ import java.util.Set;
 public class ConversationItem extends LinearLayout
     implements RecipientModifiedListener, BindableConversationItem
 {
-  private final static String TAG = ConversationItem.class.getSimpleName();
+  private static final String TAG = ConversationItem.class.getSimpleName();
+
+  private static final int MAX_MEASURE_CALLS = 3;
 
   private MessageRecord messageRecord;
   private Locale        locale;
@@ -128,6 +130,7 @@ public class ConversationItem extends LinearLayout
   private @Nullable EventListener                   eventListener;
 
   private int defaultBubbleColor;
+  private int measureCalls;
 
   private final PassthroughClickListener        passthroughClickListener   = new PassthroughClickListener();
   private final AttachmentDownloadClickListener downloadClickListener      = new AttachmentDownloadClickListener();
@@ -249,7 +252,14 @@ public class ConversationItem extends LinearLayout
     }
 
     if (needsMeasure) {
-      measure(widthMeasureSpec, heightMeasureSpec);
+      if (measureCalls < MAX_MEASURE_CALLS) {
+        measure(widthMeasureSpec, heightMeasureSpec);
+        measureCalls++;
+      } else {
+        Log.w(TAG, "Hit measure() cap of " + MAX_MEASURE_CALLS);
+      }
+    } else {
+      measureCalls = 0;
     }
   }
 
